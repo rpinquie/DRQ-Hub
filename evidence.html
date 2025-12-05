@@ -327,19 +327,52 @@
     }
 
     async function exportJSON() {
-        if (!currentMap) { alert("Please load a map first."); return; }
+        if (!currentMap) {
+            alert("Please load a map first.");
+            return;
+        }
+
         try {
             const response = await fetch(`${API_URL}/map/export`, {
-                method: "POST", headers: { "Content-Type": "application/json" },
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ mapName: currentMap, password: currentMapPassword })
             });
+
             if (!response.ok) throw new Error("Export failed");
+
             const data = await response.json();
-            const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+            const jsonString = JSON.stringify(data, null, 2);
+            const fileName = `${currentMap.replace(/\s+/g, '_')}_data.json`;
+
+            // --- Preferred: File System Access API ---
+            if (window.showDirectoryPicker) {
+                try {
+                    const dirHandle = await window.showDirectoryPicker();
+                    const fileHandle = await dirHandle.getFileHandle(fileName, { create: true });
+                    const writable = await fileHandle.createWritable();
+                    await writable.write(jsonString);
+                    await writable.close();
+                    alert("Exported successfully!");
+                    return;
+                } catch (err) {
+                    console.warn("Directory picker failed, falling back to download.", err);
+                }
+            }
+
+            // --- Fallback for unsupported browsers ---
+            const url = URL.createObjectURL(
+                new Blob([jsonString], { type: "application/json" })
+            );
             const link = document.createElement("a");
-            link.href = url; link.download = `${currentMap.replace(/\s+/g, '_')}_data.json`;
-            document.body.appendChild(link); link.click(); document.body.removeChild(link);
-        } catch (e) { console.error(e); alert("Export failed."); }
+            link.href = url;
+            link.download = fileName;
+            link.click();
+
+        } catch (e) {
+            console.error(e);
+            alert("Export failed.");
+        }
     }
 
     function exportSVG() {
@@ -462,21 +495,75 @@
 
     async function addRelationship() {
         if (!currentMap) return alert("Select a map first.");
-        const s = document.getElementById("source").value.trim(), t = document.getElementById("target").value.trim(), doi = document.getElementById("doi").value.trim();
+
+        const s = document.getElementById("source").value.trim();
+        const t = document.getElementById("target").value.trim();
+        const doi = document.getElementById("doi").value.trim();
         const level = document.getElementById("level").value;
+
         if (!s || !t) return alert("Source and Target required.");
-        let meta = { doi: doi || "assumption", title: "Assumption", author: "Unknown", year: "n.d.", journal: "-" };
-        if (level !== 'assumption' && !doi) return alert("DOI required.");
+
+        // ---- RULE: DOI required except for "assumption" ----
+        if (level !== "assumption" && !doi) {
+            return alert("A DOI is required for all evidence types except 'assumption'.");
+        }
+
+        // Default metadata (used for assumption or DOI failures)
+        let meta = {
+            doi: doi || "assumption",
+            title: level === "assumption" ? "Assumption" : "Unknown Title",
+            author: "Unknown",
+            year: "n.d.",
+            journal: "-"
+        };
+
         try {
-            if (level !== 'assumption') {
-                const r = await fetch(`${API_URL}/doi`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ doi }) });
+            // Only lookup DOI when provided
+            if (doi) {
+                const r = await fetch(`${API_URL}/doi`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ doi })
+                });
+
                 const m = await r.json();
-                if (!m.error) meta = m; else return alert("Invalid DOI");
+
+                // If DOI lookup fails → block unless assumption
+                if (m.error) {
+                    if (level === "assumption") {
+                        // assumptions skip DOI validation entirely
+                        console.warn("Invalid DOI, but allowed for assumptions.");
+                    } else {
+                        return alert("Invalid DOI.");
+                    }
+                } else {
+                    meta = m; // valid DOI → use fetched metadata
+                }
             }
-            await fetch(`${API_URL}/save-relationship`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ source: s, target: t, metadata: meta, level, causality: "", mapName: currentMap }) });
-            document.getElementById("source").value = ""; document.getElementById("target").value = ""; document.getElementById("doi").value = "";
+
+            await fetch(`${API_URL}/save-relationship`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    source: s,
+                    target: t,
+                    metadata: meta,
+                    level,
+                    causality: "",
+                    mapName: currentMap
+                })
+            });
+
+            // Reset inputs
+            document.getElementById("source").value = "";
+            document.getElementById("target").value = "";
+            document.getElementById("doi").value = "";
+
             await refreshGraph();
-        } catch (e) { alert("Error adding relationship."); }
+
+        } catch (e) {
+            alert("Error adding relationship.");
+        }
     }
 
     async function saveDefinition() {
