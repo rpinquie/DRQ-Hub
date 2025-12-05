@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Design Research Quality Resources</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* GLOBAL STYLES */
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%);
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-main: #2d3748;
+            --border-color: #e2e8f0;
+            --cell-plus: #d1fae5; /* Light Green */
+            --cell-minus: #fee2e2; /* Light Red */
+            --cell-o: #fef3c7; /* Light Yellow */
+            --cell-neutral: #ffffff;
+            --risk-bg: #e53e3e;
+            --risk-text: #fff;
+        }
+
+        html, body {
+            height: 100%; margin: 0; padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+
+        /* HEADER */
+        header {
+            background-color: var(--card-bg);
+            padding: 15px 30px;
+            border-bottom: 1px solid var(--border-color); flex-shrink: 0;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+
+        .brand-hub {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 2px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .page-title { margin: 0; font-size: 1.5rem; font-weight: 800; color: #1a202c; letter-spacing: -0.5px; }
+        .brand-resources { background: var(--secondary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .nav-link {
+            text-decoration: none; font-weight: 600; font-size: 0.9rem;
+            padding: 8px 16px; border-radius: 20px;
+            color: #718096; transition: all 0.2s;
+        }
+        .nav-link:hover { background-color: #edf2f7; color: #4a5568; }
+
+        /* FILTERS CONTAINER */
+        .filters-container { display: flex; align-items: center; gap: 20px; }
+
+        .filter-group { display: flex; flex-direction: column; gap: 2px; }
+        .filter-label { font-size: 0.75rem; font-weight: 700; color: #a0aec0; text-transform: uppercase; }
+
+        .class-selector {
+            padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e0;
+            font-family: 'Poppins'; font-weight: 600; color: #2d3748;
+            outline: none; cursor: pointer; background: #fff; font-size: 0.9rem;
+            min-width: 160px;
+        }
+        .class-selector:focus { border-color: #667eea; box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1); }
+
+        /* TABLE */
+        #content-wrapper { display: flex; flex-grow: 1; overflow: hidden; }
+        #table-container { flex-grow: 1; overflow: auto; padding: 40px; position: relative; width: 100%; transition: margin-right 0.3s ease; }
+
+        table {
+            border-collapse: separate;
+            border-spacing: 0;
+            background: #fff;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+
+        th, td {
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 8px; text-align: center;
+            font-size: 0.85rem; position: relative;
+        }
+
+        /* Sticky Headers */
+        thead th { position: sticky; top: 0; z-index: 20; background-color: #f7fafc; border-top: 1px solid var(--border-color); }
+
+        /* Sticky Row Headers */
+        tbody td.sticky-col-1, tfoot td.sticky-col-1 {
+            position: sticky; left: 0; z-index: 10; background-color: #f7fafc;
+            width: 150px; min-width: 150px; max-width: 150px;
+            border-left: 1px solid var(--border-color);
+            vertical-align: top;
+        }
+        tbody td.sticky-col-2, tfoot td.sticky-col-2 {
+            position: sticky; left: 150px; z-index: 10; background-color: #f7fafc;
+            width: 200px; min-width: 200px; max-width: 200px;
+            border-right: 2px solid #cbd5e0;
+        }
+
+        /* Footer Sticky (Risks Row) */
+        tfoot td {
+            position: sticky; bottom: 0; z-index: 15;
+            background-color: #fff9f9 !important;
+            border-top: 2px solid #cbd5e0;
+        }
+        tfoot td.sticky-col-1, tfoot td.sticky-col-2 {
+            z-index: 16;
+            background-color: var(--risk-bg) !important;
+            color: var(--risk-text);
+        }
+
+        /* Corner Header */
+        thead th.corner-header {
+            position: sticky; top: 0; left: 0; z-index: 30;
+            background-color: #edf2f7;
+            text-align: left; padding: 10px;
+            border-left: 1px solid var(--border-color);
+        }
+
+        /* Column Headers (Methods) */
+        thead th.method-col { min-width: 160px; vertical-align: top; }
+
+        /* INPUT STYLES */
+        .header-input {
+            width: 100%; border: none; background: transparent; font-weight: 700;
+            color: #2d3748; font-family: inherit; margin-bottom: 5px; text-align: center;
+        }
+        .header-input:focus { outline: none; border-bottom: 2px solid #667eea; }
+
+        .risk-textarea {
+            width: 100%; border: 1px solid #e2e8f0; background: #fff;
+            font-size: 0.75rem; padding: 6px; resize: vertical; min-height: 60px;
+            border-radius: 4px; color: #4a5568; font-family: inherit; box-sizing: border-box;
+        }
+        .risk-textarea:focus { border-color: #667eea; outline: none; }
+
+        .level-input {
+            width: 100%; border: none; background: transparent;
+            font-size: 0.85rem; padding: 4px; box-sizing: border-box;
+            resize: none; font-family: 'Poppins', sans-serif;
+            color: #2d3748;
+        }
+        .level-input:focus { background: #fff; outline: 1px solid #667eea; border-radius: 4px;}
+        .level-input::placeholder { color: #cbd5e0; font-style: italic; }
+
+        /* CELLS */
+        .data-cell { cursor: pointer; font-weight: 700; font-size: 1.4rem; height: 80px; transition: background 0.1s; vertical-align: middle; }
+        .data-cell:hover { filter: brightness(0.95); }
+
+        .data-cell[data-suitability="+"] { background-color: var(--cell-plus); }
+        .data-cell[data-suitability="-"] { background-color: var(--cell-minus); }
+        .data-cell[data-suitability="o"] { background-color: var(--cell-o); }
+        .data-cell[data-suitability=""] { background-color: var(--cell-neutral); }
+
+        .method-block {
+            margin-bottom: 2px; padding: 2px;
+            font-size: 0.8rem; color: #2d3748; font-weight: 600;
+        }
+
+        .del-btn { float: right; opacity: 0.3; cursor: pointer; color: #e53e3e; font-size: 0.8rem; transition: opacity 0.2s; }
+        .del-btn:hover { opacity: 1; }
+
+        .category-del-btn {
+            position: absolute; top: 6px; right: 6px;
+            color: #e53e3e; cursor: pointer; opacity: 0.3; font-size: 0.8rem;
+            z-index: 5;
+        }
+        .category-del-btn:hover { opacity: 1; }
+
+        /* INFO ICON */
+        .info-icon {
+            color: #667eea; font-size: 0.8rem; margin-left: 5px; cursor: pointer; opacity: 0.6;
+            position: relative; display: inline-block;
+        }
+        .info-icon:hover { opacity: 1; }
+
+        .add-type-btn {
+            position: absolute; bottom: 5px; right: 5px;
+            background: #edf2f7; color: #667eea; border-radius: 50%;
+            width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 0.8rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+        .add-type-btn:hover { background: #667eea; color: white; }
+
+        /* ADD BUTTONS */
+        .add-col-th {
+            cursor: pointer; background: #fff !important; color: #667eea;
+            font-size: 1.2rem; transition: 0.2s; min-width: 50px;
+            vertical-align: middle; text-align: center;
+        }
+        .add-col-th:hover { background: #ebf8ff !important; }
+
+        .add-row-tr td {
+            cursor: pointer; background: #fff !important; color: #667eea;
+            text-align: center; padding: 15px; font-weight: 600;
+        }
+        .add-row-tr td:hover { background: #ebf8ff !important; }
+
+        /* SIDEBAR */
+        #sidebar {
+            width: 400px; min-width: 400px;
+            background-color: #ffffff; border-left: 1px solid var(--border-color);
+            display: flex; flex-direction: column;
+            box-shadow: -4px 0 15px rgba(0,0,0,0.05); z-index: 50;
+            position: absolute; top: 0; bottom: 0; right: 0;
+            transform: translateX(100%); transition: transform 0.3s ease;
+        }
+        #sidebar.open { transform: translateX(0); }
+
+        .sidebar-header { padding: 20px; background: #f7fafc; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+
+        .suitability-panel {
+            padding: 20px 25px;
+            background: var(--panel-bg);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .methods-list-container {
+            padding: 15px;
+            background: #fff;
+            border-bottom: 1px solid var(--border-color);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .method-item {
+            padding: 10px; border: 1px solid #edf2f7; border-radius: 6px; margin-bottom: 8px;
+            cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center;
+        }
+        .method-item:hover { background: #f7fafc; border-color: #e2e8f0; }
+        .method-item.active { border-color: #667eea; background: #ebf8ff; }
+
+        .resource-list { flex-grow: 1; overflow-y: auto; padding: 20px; background: #fafafa; }
+        .resource-card { background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .res-title { font-weight: 600; font-size: 0.9rem; color: #2d3748; margin-bottom: 4px; }
+        .res-meta { font-size: 0.8rem; color: #718096; }
+        .res-link { color: #667eea; text-decoration: none; font-size: 0.8rem; display: block; margin-top: 6px; }
+
+        .method-editor { padding: 20px; border-bottom: 1px solid var(--border-color); background: #fff; display: flex; flex-direction: column; gap: 10px; }
+        .add-resource-panel { padding: 20px; border-top: 1px solid var(--border-color); background: #fff; display:flex; flex-direction:column; gap:10px;}
+        .add-input { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box;}
+        .notes-textarea {
+            width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px;
+            box-sizing: border-box; resize: vertical; min-height: 80px; font-family: inherit; font-size: 0.85rem;
+        }
+        .btn-add { width: 100%; background: var(--primary-gradient); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+        .btn-outline { width: 100%; background: #fff; color: #667eea; border: 2px dashed #667eea; padding: 8px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+        .btn-outline:hover { background: #ebf8ff; }
+
+        label { font-size:0.75rem; font-weight:600; color:#718096; display:block; margin-bottom:2px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div style="display:flex; flex-direction:column;">
+        <a href="index.html" class="brand-hub">Design Research Quality Hub</a>
+        <h2 class="page-title">Design Research Quality Resources</h2>
+    </div>
+
+    <div class="filters-container">
+        <div class="filter-group">
+            <span class="filter-label">Research Class</span>
+            <select id="paradigm-select" class="class-selector" onchange="switchParadigm(this.value)">
+                <option value="qualitative">Qualitative</option>
+                <option value="quantitative">Quantitative</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <span class="filter-label">Research Design Class</span>
+            <select id="design-select" class="class-selector" onchange="switchDesignClass(this.value)">
+                <option value="experimental">Experimental or Quasi-Experimental</option>
+                <option value="non-experimental">Non-Experimental</option>
+            </select>
+        </div>
+    </div>
+
+    <a href="index.html" class="nav-link">&larr; Back to Home</a>
+</header>
+
+<div id="content-wrapper">
+    <div id="table-container">
+        <table id="matrix-table">
+            <thead>
+            <tr>
+                <th colspan="2" style="background:transparent; border:none;"></th>
+                <th id="data-collection-header" style="text-align:center; background:#edf2f7; color:#2d3748; padding:8px; border:1px solid #e2e8f0; font-weight:800; text-transform:uppercase; letter-spacing:1px;" colspan="1">Data Collection Techniques</th>
+                <th style="background:transparent; border:none;"></th>
+                <th style="background:transparent; border:none;"></th>
+            </tr>
+            <tr id="header-row">
+                <th colspan="2" class="corner-header">
+                    <div style="font-size:0.75rem; color:#718096; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; text-align:center;">Research Designs</div>
+                    <div style="display:flex; gap:10px; font-size:0.7rem; color:#a0aec0; justify-content: space-between;">
+                        <span style="flex-grow:1; text-align:center;">Category</span>
+                        <span style="flex-grow:1; text-align:center;">Sub-category</span>
+                    </div>
+                </th>
+                <!-- Dynamic Cols -->
+            </tr>
+            </thead>
+            <tbody id="table-body">
+            <!-- Dynamic Rows -->
+            </tbody>
+            <tfoot id="table-footer">
+            <!-- Risk Row -->
+            </tfoot>
+        </table>
+    </div>
+
+    <div id="sidebar">
+        <div class="sidebar-header">
+            <div>
+                <div style="font-size:0.7rem; color:#a0aec0; text-transform:uppercase; font-weight:700;">Edit Cell</div>
+                <h3 id="sidebar-context" style="margin:0; font-size:1rem; color:#2d3748;">Select a Cell</h3>
+            </div>
+            <span class="close-btn" style="cursor:pointer; font-size:1.2rem;" onclick="closeSidebar()">&times;</span>
+        </div>
+
+        <!-- Cell Suitability -->
+        <div class="suitability-panel">
+            <label>Overall Suitability</label>
+            <select id="cell-suitability" class="add-input" onchange="updateCellSuitability(this.value)">
+                <option value="">Select...</option>
+                <option value="+">Suitable (+)</option>
+                <option value="-">Limited (-)</option>
+                <option value="o">Not Applicable (o)</option>
+            </select>
+        </div>
+
+        <div class="methods-list-container">
+            <label>Research Methods</label>
+            <div id="methods-list"></div>
+            <button class="btn-outline" onclick="addNewMethodToCell()" style="margin-top:10px;">+ Add New Method</button>
+        </div>
+
+        <div id="method-details-panel" style="display:none; flex-direction:column; flex-grow:1; overflow:hidden;">
+            <div class="method-editor">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <label>SELECTED METHOD DETAILS</label>
+                    <i class="fas fa-trash" style="color:#e53e3e; cursor:pointer;" title="Delete Method" onclick="deleteActiveMethod()"></i>
+                </div>
+
+                <div>
+                    <label>Method Name</label>
+                    <input id="method-name" class="add-input" placeholder="e.g., Lab Observation" onblur="updateMethodData()">
+                </div>
+            </div>
+
+            <div style="padding: 15px 20px 0 20px; background:#fafafa;">
+                <div style="font-size:0.75rem; font-weight:700; color:#4a5568; text-transform:uppercase;">Exemplary Papers & Guidelines</div>
+            </div>
+
+            <div class="resource-list" id="resource-list"></div>
+
+            <div class="add-resource-panel">
+                <label>Add Paper/Guideline (DOI)</label>
+                <input type="text" id="doi-input" class="add-input" placeholder="10.xxxx/...">
+                <button class="btn-add" onclick="addResource()" style="margin-top:5px;">+ Add Resource</button>
+            </div>
+        </div>
+
+        <div id="empty-state-panel" style="padding:40px; text-align:center; color:#a0aec0;">
+            Select or create a method above to view details and add resources.
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = "http://localhost:3001";
+
+    // Application State
+    let currentParadigm = 'qualitative';
+    let currentDesignGroup = 'experimental';
+    let matrix = { rows: [], cols: [], data: {} };
+
+    // UI State
+    let activeCell = null;
+    let activeMethodIndex = null;
+    let saveTimeout = null;
+
+    // --- INITIALIZATION ---
+    async function init() {
+        await fetchMatrix(currentParadigm);
+    }
+
+    async function fetchMatrix(type) {
+        try {
+            const res = await fetch(`${API_URL}/quality/matrix?type=${type}`);
+            const json = await res.json();
+
+            if (json.rows.length === 0 && json.cols.length === 0) {
+                seedDefaults(type);
+            } else {
+                // Migration check: ensure data structure supports multiple methods
+                matrix = migrateData(json);
+            }
+            renderTable();
+        } catch (e) { console.error("Load error", e); }
+    }
+
+    function migrateData(json) {
+        // Ensure every cell data has 'methods' array
+        for (let key in json.data) {
+            let cell = json.data[key];
+            if (!cell.methods) {
+                // Convert old single-method structure to array
+                if (cell.methodName || cell.val || cell.notes || (cell.resources && cell.resources.length > 0)) {
+                    cell.methods = [{
+                        id: 'rm' + Date.now() + Math.floor(Math.random()*100),
+                        name: cell.methodName || "Method 1",
+                        val: cell.val || "",
+                        // Notes removed from UI but kept in data structure if exists
+                        resources: cell.resources || []
+                    }];
+                } else {
+                    cell.methods = [];
+                }
+            }
+        }
+        return json;
+    }
+
+    function seedDefaults(type) {
+        if (type === 'qualitative') {
+            matrix = {
+                rows: [
+                    {id: 'r1', name: 'Ethnography', risks: 'Observer Bias', level1: 'Non-Experimental', level2: 'Field Work', level3: '', definition: '', catDefinition: ''},
+                    {id: 'r2', name: 'Phenomenology', risks: 'Interpretation Bias', level1: 'Non-Experimental', level2: 'Interview Based', level3: '', definition: '', catDefinition: ''},
+                    {id: 'r3', name: 'Qualitative Experiment', risks: 'Artificiality', level1: 'Experimental', level2: 'Controlled', level3: '', definition: '', catDefinition: ''}
+                ],
+                cols: [
+                    {id: 'c1', name: 'Observation', risks: ''},
+                    {id: 'c2', name: 'Interview', risks: ''}
+                ],
+                data: {}
+            };
+        } else {
+            matrix = {
+                rows: [
+                    {id: 'r1', name: 'RCT', risks: 'Ethical constraints', level1: 'Experimental', level2: 'Randomized', level3: '', definition: '', catDefinition: ''},
+                    {id: 'r2', name: 'Survey', risks: 'Response bias', level1: 'Non-Experimental', level2: 'Cross-sectional', level3: '', definition: '', catDefinition: ''}
+                ],
+                cols: [
+                    {id: 'c1', name: 'Questionnaire', risks: ''},
+                    {id: 'c2', name: 'Measurement', risks: ''}
+                ],
+                data: {}
+            };
+        }
+        triggerSave();
+    }
+
+    function switchParadigm(val) {
+        currentParadigm = val;
+        fetchMatrix(val);
+    }
+
+    function switchDesignClass(val) {
+        currentDesignGroup = val;
+        renderTable();
+    }
+
+    // --- RENDERING TABLE ---
+
+    function renderTable() {
+        const headerRow = document.getElementById('header-row');
+        const tbody = document.getElementById('table-body');
+        const tfoot = document.getElementById('table-footer');
+        const superHeader = document.getElementById('data-collection-header');
+
+        superHeader.colSpan = matrix.cols.length + 1;
+
+        // 1. Column Headers
+        while (headerRow.children.length > 1) headerRow.removeChild(headerRow.lastChild);
+
+        matrix.cols.forEach(col => {
+            const th = document.createElement('th');
+            th.className = 'method-col';
+            th.innerHTML = `
+                <div style="display:flex; flex-direction:column; align-items:center;">
+                    <input class="header-input" value="${col.name}" onblur="updateCol('${col.id}', 'name', this.value)">
+                    <i class="fas fa-trash del-btn" onclick="deleteCol('${col.id}')"></i>
+                </div>
+            `;
+            headerRow.appendChild(th);
+        });
+
+        const addColTh = document.createElement('th');
+        addColTh.className = 'add-col-th';
+        addColTh.innerHTML = '<i class="fas fa-plus"></i>';
+        addColTh.onclick = addNewCol;
+        headerRow.appendChild(addColTh);
+
+        const riskColTh = document.createElement('th');
+        riskColTh.style.backgroundColor = 'var(--risk-bg)';
+        riskColTh.style.color = 'var(--risk-text)';
+        riskColTh.style.minWidth = "200px";
+        riskColTh.style.fontWeight = "bold";
+        riskColTh.style.textAlign = "center";
+        riskColTh.style.verticalAlign = "middle";
+        riskColTh.innerText = "Research Design Risks";
+        headerRow.appendChild(riskColTh);
+
+        // 2. Render Rows
+        tbody.innerHTML = '';
+
+        // FILTER: Only show rows that match current design group
+        const filteredRows = matrix.rows.filter(r => {
+            if (currentDesignGroup === 'experimental') {
+                return r.level1 === 'Experimental' || r.level1 === 'Quasi-Experimental';
+            } else {
+                return r.level1 === 'Non-Experimental';
+            }
+        });
+
+        const groups = {};
+        filteredRows.forEach(r => {
+            const spec = r.level2 || "Unspecified";
+            if(!groups[spec]) groups[spec] = [];
+            groups[spec].push(r);
+        });
+
+        for (const [specifics, rows] of Object.entries(groups)) {
+            rows.forEach((row, index) => {
+                const tr = document.createElement('tr');
+
+                // Specifics Col (Category)
+                if (index === 0) {
+                    const td1 = document.createElement('td');
+                    td1.className = 'sticky-col-1';
+                    td1.rowSpan = rows.length;
+                    td1.innerHTML = `
+                        <div style="height:100%; display:flex; flex-direction:column; justify-content:space-between; position:relative;">
+                            <i class="fas fa-trash category-del-btn" onclick="deleteCategory('${specifics}')" title="Delete Category Group"></i>
+                            <div style="display:flex; align-items:center;">
+                                <textarea class="level-input" style="height:100%; border:none; padding-top:20px;" placeholder="Category..." onblur="updateSpecificsName('${specifics}', this.value)" title="${row.catDefinition || ''}">${specifics}</textarea>
+                                <i class="fas fa-info-circle info-icon" onclick="editDefinition('${row.id}', 'catDefinition')"></i>
+                            </div>
+                            <div title="Add Sub-category to this group" class="add-type-btn" onclick="addNewType('${specifics}')"><i class="fas fa-plus"></i></div>
+                        </div>
+                    `;
+                    tr.appendChild(td1);
+                }
+
+                // Type Col (Sub-category)
+                const td2 = document.createElement('td');
+                td2.className = 'sticky-col-2';
+
+                // Add button only on the last row of the group
+                let addButtonHtml = '';
+                if (index === rows.length - 1) {
+                    const safeSpecifics = specifics.replace(/'/g, "\\'");
+                    addButtonHtml = `<div title="Add Sub-category to this group" class="add-type-btn" onclick="addNewType('${safeSpecifics}')"><i class="fas fa-plus"></i></div>`;
+                }
+
+                td2.innerHTML = `
+                    <div style="position:relative; width:100%; height:100%; display:flex; align-items:center;">
+                        <textarea class="level-input" style="height:100%; border:none; resize:none; width:90%;" placeholder="Sub-category..." onblur="updateRow('${row.id}', 'name', this.value)" title="${row.definition || ''}">${row.name}</textarea>
+                        <i class="fas fa-info-circle info-icon" style="margin-right:5px;" onclick="editDefinition('${row.id}', 'definition')"></i>
+                        <i class="fas fa-trash del-btn" style="position:absolute; right:0; top:5px;" onclick="deleteRow('${row.id}')"></i>
+                        ${addButtonHtml}
+                    </div>
+                `;
+                tr.appendChild(td2);
+
+                // Data Cells
+                matrix.cols.forEach(col => {
+                    const td = document.createElement('td');
+                    td.className = 'data-cell';
+                    const key = `${row.id}_${col.id}`;
+                    const cellData = matrix.data[key] || { methods: [], suitability: "" };
+
+                    // Apply Background Color based on suitability
+                    td.setAttribute('data-suitability', cellData.suitability);
+
+                    // Render stacked methods
+                    let html = '';
+                    if (cellData.methods && cellData.methods.length > 0) {
+                        cellData.methods.forEach(m => {
+                            html += `
+                                <div class="method-block">
+                                    ${m.name}
+                                </div>
+                            `;
+                        });
+                        td.innerHTML = html;
+                    } else {
+                        td.innerHTML = '';
+                    }
+
+                    td.onclick = () => openSidebar(row, col, key);
+                    tr.appendChild(td);
+                });
+
+                tr.appendChild(document.createElement('td'));
+
+                const tdRisk = document.createElement('td');
+                tdRisk.innerHTML = `<textarea class="risk-textarea" placeholder="Design risks..." onblur="updateRow('${row.id}', 'risks', this.value)">${row.risks || ''}</textarea>`;
+                tr.appendChild(tdRisk);
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Add Row Buttons
+        const addRowTr = document.createElement('tr');
+        addRowTr.className = 'add-row-tr';
+        const addRowTd = document.createElement('td');
+        addRowTd.colSpan = 2;
+        addRowTd.className = 'sticky-col-1';
+        addRowTd.style.width = 'auto';
+        addRowTd.style.maxWidth = 'none';
+        addRowTd.innerHTML = '<i class="fas fa-plus"></i> Add New Category Group';
+        addRowTd.onclick = addNewSpecifics;
+        addRowTr.appendChild(addRowTd);
+
+        for(let i=0; i <= matrix.cols.length + 1; i++) addRowTr.appendChild(document.createElement('td'));
+        tbody.appendChild(addRowTr);
+
+        // Footer
+        tfoot.innerHTML = '';
+        const riskRow = document.createElement('tr');
+        const riskHeaderTd = document.createElement('td');
+        riskHeaderTd.colSpan = 2;
+        riskHeaderTd.className = 'sticky-col-1';
+        riskHeaderTd.style.textAlign = "right";
+        riskHeaderTd.style.fontWeight = "bold";
+        riskHeaderTd.style.paddingRight = "15px";
+        riskHeaderTd.innerText = "Data Collection Risks";
+        riskRow.appendChild(riskHeaderTd);
+
+        matrix.cols.forEach(col => {
+            const td = document.createElement('td');
+            td.innerHTML = `<textarea class="risk-textarea" placeholder="Technique risks..." onblur="updateCol('${col.id}', 'risks', this.value)">${col.risks || ''}</textarea>`;
+            riskRow.appendChild(td);
+        });
+
+        riskRow.appendChild(document.createElement('td'));
+        riskRow.appendChild(document.createElement('td'));
+        tfoot.appendChild(riskRow);
+    }
+
+    // --- LOGIC ---
+
+    function triggerSave() {
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(saveMatrix, 1000);
+    }
+
+    async function saveMatrix() {
+        try {
+            await fetch(`${API_URL}/quality/matrix/save`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: currentParadigm, matrix })
+            });
+            console.log("Saved.");
+        } catch (e) { console.error("Save failed", e); }
+    }
+
+    function addNewSpecifics() {
+        const id = 'r' + Date.now();
+        const defaultClass = currentDesignGroup === 'experimental' ? 'Experimental' : 'Non-Experimental';
+        const newCatName = 'New Category ' + Math.floor(Math.random() * 1000);
+
+        matrix.rows.push({
+            id, name: 'New Sub-category', risks: '', level1: defaultClass, level2: newCatName, level3: '', definition: '', catDefinition: ''
+        });
+        renderTable(); triggerSave();
+    }
+
+    function addNewType(specificsVal) {
+        const id = 'r' + Date.now();
+        const defaultClass = currentDesignGroup === 'experimental' ? 'Experimental' : 'Non-Experimental';
+        matrix.rows.push({
+            id, name: 'New Sub-category', risks: '', level1: defaultClass, level2: specificsVal, level3: '', definition: '', catDefinition: ''
+        });
+        renderTable(); triggerSave();
+    }
+
+    function addNewCol() {
+        const id = 'c' + Date.now();
+        matrix.cols.push({ id, name: 'New Method', risks: '' });
+        renderTable(); triggerSave();
+    }
+
+    function deleteRow(id) {
+        if(!confirm("Delete this Sub-category row?")) return;
+        matrix.rows = matrix.rows.filter(r => r.id !== id);
+        Object.keys(matrix.data).forEach(k => { if(k.startsWith(id + '_')) delete matrix.data[k]; });
+        renderTable(); triggerSave();
+    }
+
+    function deleteCategory(categoryName) {
+        if(!confirm(`Delete entire category "${categoryName}" and all its sub-categories?`)) return;
+
+        matrix.rows = matrix.rows.filter(r => {
+            const isTargetView = (currentDesignGroup === 'experimental')
+                ? (r.level1 === 'Experimental' || r.level1 === 'Quasi-Experimental')
+                : (r.level1 === 'Non-Experimental');
+
+            if (isTargetView && r.level2 === categoryName) return false;
+            return true;
+        });
+
+        renderTable();
+        triggerSave();
+    }
+
+    function deleteCol(id) {
+        if(!confirm("Delete this column?")) return;
+        matrix.cols = matrix.cols.filter(c => c.id !== id);
+        Object.keys(matrix.data).forEach(k => { if(k.endsWith('_' + id)) delete matrix.data[k]; });
+        renderTable(); triggerSave();
+    }
+
+    function updateRow(id, field, val) {
+        const r = matrix.rows.find(r => r.id === id);
+        if(r && r[field] !== val) { r[field] = val; triggerSave(); }
+    }
+
+    function updateSpecificsName(oldVal, newVal) {
+        if(oldVal === newVal) return;
+        const viewRows = matrix.rows.filter(r => {
+            if (currentDesignGroup === 'experimental') return r.level1 === 'Experimental' || r.level1 === 'Quasi-Experimental';
+            return r.level1 === 'Non-Experimental';
+        });
+        viewRows.forEach(r => {
+            if (r.level2 === oldVal) {
+                r.level2 = newVal;
+            }
+        });
+        triggerSave();
+    }
+
+    function editDefinition(id, field) {
+        const r = matrix.rows.find(r => r.id === id);
+        if(!r) return;
+
+        const currentDef = r[field] || "";
+        const newDef = prompt("Enter definition:", currentDef);
+
+        if(newDef !== null && newDef !== currentDef) {
+            r[field] = newDef;
+            // If editing category definition, sync across all rows in that category
+            if(field === 'catDefinition') {
+                const catName = r.level2;
+                matrix.rows.forEach(row => {
+                    if(row.level1 === r.level1 && row.level2 === catName) {
+                        row.catDefinition = newDef;
+                    }
+                });
+            }
+            triggerSave();
+            renderTable();
+        }
+    }
+
+    function updateCol(id, field, val) {
+        const c = matrix.cols.find(c => c.id === id);
+        if(c && c[field] !== val) { c[field] = val; triggerSave(); }
+    }
+
+    // --- SIDEBAR & METHOD EDITING ---
+
+    function openSidebar(row, col, key) {
+        activeCell = key;
+        activeMethodIndex = null; // Reset selection
+
+        document.getElementById('sidebar').classList.add('open');
+        document.getElementById('table-container').style.marginRight = "400px"; // Push table container specifically
+
+        document.getElementById('sidebar-context').innerHTML = `${col.name}<br><span style="font-weight:400; font-size:0.8em; color:#718096;">in ${row.name}</span>`;
+
+        if(!matrix.data[key]) matrix.data[key] = { methods: [], suitability: "" };
+
+        document.getElementById('cell-suitability').value = matrix.data[key].suitability || "";
+
+        renderMethodsList();
+        updateEditorVisibility();
+    }
+
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('table-container').style.marginRight = "0"; // Reset table width
+        activeCell = null;
+        activeMethodIndex = null;
+    }
+
+    function updateCellSuitability(val) {
+        if (!activeCell) return;
+        matrix.data[activeCell].suitability = val;
+        triggerSave();
+        renderTable(); // Re-render to change cell color
+    }
+
+    function renderMethodsList() {
+        const listContainer = document.getElementById('methods-list');
+        listContainer.innerHTML = '';
+
+        const cellData = matrix.data[activeCell];
+        if (cellData.methods.length === 0) {
+            listContainer.innerHTML = '<div style="font-size:0.8rem; color:#cbd5e0; font-style:italic;">No methods defined yet.</div>';
+            return;
+        }
+
+        cellData.methods.forEach((method, index) => {
+            const item = document.createElement('div');
+            item.className = `method-item ${index === activeMethodIndex ? 'active' : ''}`;
+            item.innerHTML = `
+                <div style="font-weight:600; font-size:0.85rem;">${method.name || 'Unnamed Method'}</div>
+                <i class="fas fa-chevron-right" style="font-size:0.7rem; color:#cbd5e0;"></i>
+            `;
+            item.onclick = () => selectMethod(index);
+            listContainer.appendChild(item);
+        });
+    }
+
+    function addNewMethodToCell() {
+        if (!activeCell) return;
+        matrix.data[activeCell].methods.push({
+            id: 'rm' + Date.now() + Math.floor(Math.random()*100),
+            name: "New Method",
+            val: "?",
+            notes: "",
+            resources: []
+        });
+        triggerSave();
+        renderTable();
+        selectMethod(matrix.data[activeCell].methods.length - 1);
+    }
+
+    function selectMethod(index) {
+        activeMethodIndex = index;
+        renderMethodsList();
+        updateEditorVisibility();
+
+        const method = matrix.data[activeCell].methods[index];
+        document.getElementById('method-name').value = method.name || "";
+
+        renderResources();
+    }
+
+    function updateEditorVisibility() {
+        const editor = document.getElementById('method-details-panel');
+        const empty = document.getElementById('empty-state-panel');
+
+        if (activeMethodIndex !== null) {
+            editor.style.display = 'flex';
+            empty.style.display = 'none';
+        } else {
+            editor.style.display = 'none';
+            empty.style.display = 'block';
+        }
+    }
+
+    function updateMethodData() {
+        if (!activeCell || activeMethodIndex === null) return;
+
+        const method = matrix.data[activeCell].methods[activeMethodIndex];
+        method.name = document.getElementById('method-name').value;
+
+        triggerSave();
+        renderTable();
+        renderMethodsList();
+    }
+
+    function deleteActiveMethod() {
+        if (activeMethodIndex === null) return;
+        if (!confirm("Delete this method?")) return;
+
+        matrix.data[activeCell].methods.splice(activeMethodIndex, 1);
+        activeMethodIndex = null;
+        triggerSave();
+        renderTable();
+        renderMethodsList();
+        updateEditorVisibility();
+    }
+
+    function renderResources() {
+        const list = document.getElementById('resource-list');
+        list.innerHTML = '';
+
+        if (activeMethodIndex === null) return;
+
+        const method = matrix.data[activeCell].methods[activeMethodIndex];
+
+        if (!method.resources || method.resources.length === 0) {
+            list.innerHTML = '<div style="color:#a0aec0; text-align:center; margin-top:20px; font-size:0.9rem;">No resources added yet.</div>';
+            return;
+        }
+
+        method.resources.forEach((res, index) => {
+            const card = document.createElement('div');
+            card.className = 'resource-card';
+            card.innerHTML = `
+                <div class="res-title">${res.title}</div>
+                <div class="res-meta">${res.author} (${res.year})</div>
+                <a href="https://doi.org/${res.doi}" target="_blank" class="res-link"><i class="fas fa-external-link-alt"></i> ${res.doi}</a>
+                <div style="text-align:right; margin-top:5px;"><i class="fas fa-trash del-btn" style="float:none;" onclick="removeResource(${index})"></i></div>
+            `;
+            list.appendChild(card);
+        });
+    }
+
+    async function addResource() {
+        if (!activeCell || activeMethodIndex === null) return;
+
+        const doiInput = document.getElementById('doi-input');
+        const doi = doiInput.value.trim();
+        if (!doi) return;
+
+        try {
+            const r = await fetch(`${API_URL}/doi`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ doi }) });
+            const meta = await r.json();
+            if (meta.error) { alert("Invalid DOI"); return; }
+
+            const method = matrix.data[activeCell].methods[activeMethodIndex];
+            if (!method.resources) method.resources = [];
+
+            method.resources.push(meta);
+
+            triggerSave();
+            renderResources();
+            doiInput.value = '';
+        } catch (e) { alert("Error fetching metadata."); }
+    }
+
+    function removeResource(index) {
+        if (!confirm("Remove resource?")) return;
+        const method = matrix.data[activeCell].methods[activeMethodIndex];
+        method.resources.splice(index, 1);
+        triggerSave();
+        renderResources();
+    }
+
+    window.onload = init;
+</script>
+</body>
+</html>
