@@ -25,7 +25,9 @@
             display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* SEXY HEADER STYLES */
+        #import-file { display: none; }
+
+        /* HEADER STYLES */
         header {
             background-color: var(--card-bg);
             padding: 15px 30px;
@@ -48,13 +50,7 @@
             cursor: pointer;
         }
 
-        .page-title {
-            margin: 0;
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: #1a202c;
-            letter-spacing: -0.5px;
-        }
+        .page-title { margin: 0; font-size: 1.5rem; font-weight: 800; color: #1a202c; letter-spacing: -0.5px; }
 
         /* NAVIGATION & CONTROLS */
         #map-controls { display: flex; gap: 12px; align-items: center; }
@@ -66,11 +62,10 @@
             border: 1px solid transparent;
         }
         .nav-link:hover { background-color: #edf2f7; color: #4a5568; }
-        .nav-link.active { background-color: #ebf8ff; color: #3182ce; border-color: #bee3f8; }
 
         .divider { width: 1px; height: 24px; background: var(--border-color); margin: 0 5px; }
 
-        /* BUTTONS & INPUTS */
+        /* BUTTONS */
         button {
             border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
             padding: 8px 16px; font-family: 'Poppins', sans-serif; font-size: 0.85rem;
@@ -79,14 +74,9 @@
         button:active { transform: translateY(1px); }
 
         .btn-primary { background: var(--primary-gradient); color: white; box-shadow: 0 4px 6px rgba(118, 75, 162, 0.3); }
-        .btn-primary:hover { opacity: 0.9; }
-
         .btn-accent { background: var(--secondary-gradient); color: white; box-shadow: 0 4px 6px rgba(255, 75, 43, 0.3); }
-        .btn-accent:hover { opacity: 0.9; }
-
         .btn-warning { background-color: #fff5f5; color: #c53030; border: 1px solid #feb2b2; }
         .btn-warning:hover { background-color: #fed7d7; }
-
         .btn-secondary { background-color: #fff; border: 1px solid var(--border-color); color: var(--text-main); }
         .btn-secondary:hover { background-color: #f7fafc; }
 
@@ -104,79 +94,37 @@
             gap: 15px; align-items: flex-end; flex-wrap: wrap; flex-shrink: 0;
         }
 
-        /* NEW FILTER STYLES */
         .filter-section {
-            border-left: 1px solid var(--border-color);
-            padding-left: 15px;
-            margin-left: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
+            border-left: 1px solid var(--border-color); padding-left: 15px; margin-left: 10px;
+            display: flex; flex-direction: column; gap: 4px;
         }
-
-        .filter-group {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        .filter-option {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 0.8rem;
-            color: var(--text-main);
-            cursor: pointer;
-            user-select: none;
-        }
-
+        .filter-group { display: flex; gap: 12px; align-items: center; }
+        .filter-option { display: flex; align-items: center; gap: 5px; font-size: 0.8rem; color: var(--text-main); cursor: pointer; user-select: none; font-weight: 500; }
         .filter-option input { margin: 0; padding: 0; width: auto; cursor: pointer; }
 
-        #main-view {
-            display: flex; flex-grow: 1; position: relative;
-            overflow: hidden; width: 100%;
-        }
-
-        #cy {
-            flex-grow: 1;
-            background-color: #ffffff;
-            min-width: 0;
-            transition: width 0.3s ease;
-        }
-
+        #main-view { display: flex; flex-grow: 1; position: relative; overflow: hidden; width: 100%; }
+        #cy { flex-grow: 1; background-color: #ffffff; min-width: 0; transition: width 0.3s ease; }
         #sidebar {
-            width: 380px; min-width: 380px;
-            background-color: #ffffff; border-left: 1px solid var(--border-color);
-            display: none; flex-direction: column; flex-shrink: 0;
-            overflow-y: auto; box-shadow: -4px 0 15px rgba(0,0,0,0.05); z-index: 20;
+            width: 380px; min-width: 380px; background-color: #ffffff; border-left: 1px solid var(--border-color);
+            display: none; flex-direction: column; flex-shrink: 0; overflow-y: auto; box-shadow: -4px 0 15px rgba(0,0,0,0.05); z-index: 20;
         }
 
         .panel { padding: 25px; }
         h3 { margin-top: 0; font-size: 1.1em; color: var(--text-main); font-weight: 600; border-bottom: 2px solid #edf2f7; padding-bottom: 10px; margin-bottom: 20px;}
-
         .action-group { display: flex; flex-direction: column; gap: 20px; }
         label { font-weight: 600; font-size: 0.8rem; color: #718096; margin-bottom: 6px; display: block; text-transform: uppercase; }
         textarea { min-height: 100px; width: 100%; box-sizing: border-box; resize: vertical; }
 
         #map-select { width: 220px; }
         #controls input.text-input { width: 140px; }
-
-        .edge-details {
-            background: #f7fafc; padding: 15px; border-radius: 8px; border: 1px solid #edf2f7;
-            font-size: 0.9rem; line-height: 1.6;
-        }
-
+        .edge-details { background: #f7fafc; padding: 15px; border-radius: 8px; border: 1px solid #edf2f7; font-size: 0.9rem; line-height: 1.6; }
         .selected { border-width: 4px !important; border-color: #F6E05E !important; }
-
-        .help-text { font-size: 0.75rem; color: #a0aec0; margin-left: 10px; font-style: italic; }
 
         #fit-btn {
             position: absolute; bottom: 20px; left: 20px; z-index: 10;
-            width: 45px; height: 45px; border-radius: 50%;
-            background: #fff; color: #2d3748; border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: all 0.2s; padding: 0;
+            width: 45px; height: 45px; border-radius: 50%; background: #fff; color: #2d3748;
+            border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; padding: 0;
         }
         #fit-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 8px rgba(0,0,0,0.15); color: #667eea; }
     </style>
@@ -196,7 +144,10 @@
             <option value="" disabled selected>Select a Map...</option>
         </select>
         <button class="btn-primary" onclick="createNewMap()">+ New Map</button>
-        <button class="btn-warning" onclick="deleteMap()">Delete Map</button>
+        <button class="btn-secondary" onclick="exportJSON()" title="Download Map Data"><i class="fas fa-file-export"></i> JSON</button>
+        <button class="btn-secondary" onclick="document.getElementById('import-file').click()" title="Import Map Data"><i class="fas fa-file-import"></i> Import</button>
+        <input type="file" id="import-file" accept=".json" onchange="importJSON(this)">
+        <button class="btn-warning" onclick="deleteMap()"><i class="fas fa-trash"></i></button>
         <button class="btn-accent" onclick="exportSVG()">Export SVG</button>
     </div>
 </header>
@@ -217,56 +168,36 @@
     <div style="display:flex; flex-direction:column; gap:2px;">
         <label style="margin:0; font-size:0.7rem;">Evidence Level</label>
         <select id="level">
-            <option value="controlled experiment">Controlled Experiment</option>
+            <option value="experiment">Experiment</option>
             <option value="observation">Observation</option>
             <option value="expert opinion">Expert Opinion</option>
             <option value="assumption">Assumption</option>
         </select>
     </div>
-
     <button class="btn-primary" id="add-btn" onclick="addRelationship()" style="height: 38px; margin-bottom: 2px;" disabled>Add Evidence</button>
 
     <div class="filter-section">
         <label style="margin:0; font-size:0.7rem;">Filter Visibility</label>
         <div class="filter-group">
-            <label class="filter-option" title="Show Controlled Experiments">
-                <input type="checkbox" class="filter-cb" value="controlled experiment" checked onchange="applyFilters()">
-                <span style="color:#48BB78; font-weight:800;">●</span> Exp
-            </label>
-            <label class="filter-option" title="Show Observations">
-                <input type="checkbox" class="filter-cb" value="observation" checked onchange="applyFilters()">
-                <span style="color:#ECC94B; font-weight:800;">●</span> Obs
-            </label>
-            <label class="filter-option" title="Show Expert Opinions">
-                <input type="checkbox" class="filter-cb" value="expert opinion" checked onchange="applyFilters()">
-                <span style="color:#F56565; font-weight:800;">●</span> Ops
-            </label>
-            <label class="filter-option" title="Show Assumptions">
-                <input type="checkbox" class="filter-cb" value="assumption" checked onchange="applyFilters()">
-                <span style="color:#A0AEC0; font-weight:800;">--</span> Assump
-            </label>
+            <label class="filter-option"><input type="checkbox" class="filter-cb" value="experiment" checked onchange="applyFilters()"><span style="color:#48BB78; font-weight:800;">●</span> Exp</label>
+            <label class="filter-option"><input type="checkbox" class="filter-cb" value="observation" checked onchange="applyFilters()"><span style="color:#ECC94B; font-weight:800;">●</span> Obs</label>
+            <label class="filter-option"><input type="checkbox" class="filter-cb" value="expert opinion" checked onchange="applyFilters()"><span style="color:#F56565; font-weight:800;">●</span> Ops</label>
+            <label class="filter-option"><input type="checkbox" class="filter-cb" value="assumption" checked onchange="applyFilters()"><span style="color:#A0AEC0; font-weight:800;">--</span> Assump</label>
         </div>
     </div>
 </div>
 
 <div id="main-view">
     <div id="cy"></div>
-
-    <button id="fit-btn" onclick="fitGraph()" title="Fit Graph to View">
-        <i class="fas fa-compress-arrows-alt" style="font-size: 1.2rem;"></i>
-    </button>
+    <button id="fit-btn" onclick="fitGraph()" title="Fit Graph to View"><i class="fas fa-compress-arrows-alt" style="font-size: 1.2rem;"></i></button>
 
     <div id="sidebar">
         <div id="actions" class="panel">
             <h3 id="sidebar-title">Selection Details</h3>
-
             <div id="node-actions" class="action-group" style="display:none;">
                 <div>
                     <label>Rename Factor</label>
-                    <div style="display:flex; gap:5px;">
-                        <input id="new-node-name" style="flex-grow:1;">
-                        <button class="btn-secondary" onclick="renameNode()">Save</button>
-                    </div>
+                    <div style="display:flex; gap:5px;"><input id="new-node-name" style="flex-grow:1;"><button class="btn-secondary" onclick="renameNode()">Save</button></div>
                 </div>
                 <div>
                     <label>Definition</label>
@@ -282,18 +213,14 @@
                 </div>
                 <button class="btn-warning" onclick="deleteSelected()">Delete Factor</button>
             </div>
-
             <div id="edge-actions" class="action-group" style="display:none;">
                 <div id="edge-metadata-display" class="edge-details"></div>
-                <div>
-                    <label>Notes</label>
-                    <textarea id="edge-notes" placeholder="Add comments here..." style="min-height: 80px;"></textarea>
-                </div>
+                <div><label>Notes</label><textarea id="edge-notes" placeholder="Add comments here..." style="min-height: 80px;"></textarea></div>
                 <div>
                     <label>Update Relationship</label>
                     <div style="display:flex; flex-direction:column; gap:10px;">
                         <select id="new-evidence-level" style="width:100%;">
-                            <option value="controlled experiment">Controlled Experiment</option>
+                            <option value="experiment">Experiment</option>
                             <option value="observation">Observation</option>
                             <option value="expert opinion">Expert Opinion</option>
                             <option value="assumption">Assumption</option>
@@ -314,17 +241,10 @@
     let activePicker = null;
 
     function createCompositeEdgeId(source, target, doi) {
-        const cleanSource = (source || "").replace(/[^a-zA-Z0-9]/g, '');
-        const cleanTarget = (target || "").replace(/[^a-zA-Z0-9]/g, '');
-        const cleanDOI = (doi || "").replace(/[^a-zA-Z0-9]/g, '');
-        return `${cleanSource}_${cleanTarget}_${cleanDOI}`;
+        return `${(source||"").replace(/[^a-zA-Z0-9]/g, '')}_${(target||"").replace(/[^a-zA-Z0-9]/g, '')}_${(doi||"").replace(/[^a-zA-Z0-9]/g, '')}`;
     }
 
-    const coseLayout = {
-        name: 'cose', padding: 50, animate: true, idealEdgeLength: 100,
-        nodeOverlap: 20, componentSpacing: 40, nodeRepulsion: 400000,
-        stop: function(){ cy.fit(); cy.center(); }
-    };
+    const coseLayout = { name: 'cose', padding: 50, animate: true, idealEdgeLength: 100, nodeOverlap: 20, componentSpacing: 40, nodeRepulsion: 400000, stop: function(){ cy.fit(); cy.center(); } };
 
     const cy = cytoscape({
         container: document.getElementById('cy'),
@@ -334,116 +254,64 @@
             {
                 selector: 'node',
                 style: {
-                    'shape': 'round-rectangle', 'background-color': '#fff',
-                    'border-width': 2, 'border-color': '#667eea',
-                    'label': 'data(label)',
-                    'color': '#2d3748', 'text-valign': 'center', 'text-halign': 'center',
-                    'font-weight': '600', 'font-family': 'Poppins',
-                    'padding': '12px', 'width': 'label', 'height': 'label',
-                    'text-wrap': 'wrap', 'text-max-width': '120px',
+                    'shape': 'round-rectangle', 'background-color': '#fff', 'border-width': 2, 'border-color': '#667eea',
+                    'label': 'data(label)', 'color': '#2d3748', 'text-valign': 'center', 'text-halign': 'center', 'font-weight': '600',
+                    'font-family': 'Poppins', 'padding': '12px', 'width': 'label', 'height': 'label', 'text-wrap': 'wrap', 'text-max-width': '120px',
                 }
             },
-            {
-                selector: 'node.selected',
-                style: { 'border-width': 4, 'border-color': '#F6E05E', 'background-color': '#ebf8ff' }
-            },
+            { selector: 'node.selected', style: { 'border-width': 4, 'border-color': '#F6E05E', 'background-color': '#ebf8ff' } },
             {
                 selector: 'edge',
                 style: {
-                    'curve-style': 'bezier', 'target-arrow-shape': 'triangle',
-                    'width': 2, 'line-color': '#cbd5e0', 'target-arrow-color': '#cbd5e0',
+                    'curve-style': 'bezier', 'target-arrow-shape': 'triangle', 'width': 2, 'line-color': '#cbd5e0', 'target-arrow-color': '#cbd5e0',
                     'label': function(ele) {
-                        const author = ele.data('author') || 'Unknown';
-                        const year = ele.data('year') || 'n.d.';
-                        // Don't show citation for assumptions if author is missing
-                        if(ele.data('level') === 'assumption' && author === 'Unknown') return 'Assumption';
-                        return `${author.split(',')[0]} (${year})`;
+                        const a = ele.data('author')||'Unknown', y = ele.data('year')||'n.d.';
+                        return (ele.data('level')==='assumption' && a==='Unknown') ? 'Assumption' : `${a.split(',')[0]} (${y})`;
                     },
-                    'font-size': '10px', 'font-family': 'Poppins', 'text-rotation': 'autorotate',
-                    'text-background-color': '#fff', 'text-background-opacity': 1, 'text-background-padding': '2px',
-                    'color': '#718096',
-
-                    'source-label': function(ele){
-                        const c = ele.data('causality');
-                        if(c && c.length === 2) return c[0];
-                        return '';
-                    },
-                    'source-text-offset': 30,
-
-                    'target-label': function(ele){
-                        const c = ele.data('causality');
-                        if(c && c.length === 2) return c[1];
-                        return '';
-                    },
-                    'target-text-offset': 30,
-                    'font-weight': 'bold',
-                    'text-margin-y': -5
+                    'font-size': '10px', 'font-family': 'Poppins', 'text-rotation': 'autorotate', 'text-background-color': '#fff',
+                    'text-background-opacity': 1, 'text-background-padding': '2px', 'color': '#718096',
+                    'source-label': e => (e.data('causality')||[]).length===2 ? e.data('causality')[0] : '', 'source-text-offset': 30,
+                    'target-label': e => (e.data('causality')||[]).length===2 ? e.data('causality')[1] : '', 'target-text-offset': 30,
+                    'font-weight': 'bold', 'text-margin-y': -5
                 }
             },
-            // STYLES FOR EVIDENCE LEVELS
-            { selector: 'edge[level="controlled experiment"]', style: { 'line-color': '#48BB78', 'target-arrow-color': '#48BB78' } },
+            { selector: 'edge[level="experiment"]', style: { 'line-color': '#48BB78', 'target-arrow-color': '#48BB78' } },
             { selector: 'edge[level="observation"]', style: { 'line-color': '#ECC94B', 'target-arrow-color': '#ECC94B' } },
             { selector: 'edge[level="expert opinion"]', style: { 'line-color': '#F56565', 'target-arrow-color': '#F56565' } },
-            // New Assumption Style: Gray, Dashed
             { selector: 'edge[level="assumption"]', style: { 'line-color': '#A0AEC0', 'target-arrow-color': '#A0AEC0', 'line-style': 'dashed' } },
-
             { selector: 'edge[causality="++"]', style: { 'color': '#48BB78' } },
             { selector: 'edge[causality="--"]', style: { 'color': '#F56565' } },
-
             { selector: 'edge.selected', style: { 'width': 4, 'line-color': '#4A5568', 'target-arrow-color': '#4A5568', 'z-index': 999 } },
-
-            // FILTERING STYLE
             { selector: 'edge.filtered-hidden', style: { 'display': 'none' } }
         ],
         wheelSensitivity: 0.2
     });
 
-    // --- NEW FILTER FUNCTIONALITY ---
+    // --- LOGIC ---
     function applyFilters() {
-        const checkboxes = document.querySelectorAll('.filter-cb');
-        const activeFilters = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
-
+        const activeFilters = Array.from(document.querySelectorAll('.filter-cb')).filter(cb => cb.checked).map(cb => cb.value);
         cy.batch(() => {
             cy.edges().forEach(edge => {
-                const level = edge.data('level');
-                if (activeFilters.includes(level)) {
-                    edge.removeClass('filtered-hidden');
-                } else {
-                    edge.addClass('filtered-hidden');
-                }
+                if (activeFilters.includes(edge.data('level'))) edge.removeClass('filtered-hidden');
+                else edge.addClass('filtered-hidden');
             });
         });
     }
 
-    // --- INTERACTION: RIGHT CLICK TOGGLE ---
     cy.on('cxttap', 'edge', async function(evt){
         const edge = evt.target;
-        const current = edge.data('causality') || "";
-        let next = "";
-
-        if(current === "") next = "++";
-        else if(current === "++") next = "+-";
-        else if(current === "+-") next = "-+";
-        else if(current === "-+") next = "--";
-        else next = "";
-
-        edge.data('causality', next);
+        const map = {"":"++", "++":"+-", "+-":"-+", "-+":"--", "--":""};
+        edge.data('causality', map[edge.data('causality')||""] || "");
         await saveEdgeData(edge);
     });
 
     async function saveEdgeData(edge) {
         try {
             await fetch(`${API_URL}/relationship/update`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
+                method: "POST", headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    source: edge.data('source'),
-                    target: edge.data('target'),
-                    doi: edge.data('doi'),
-                    level: edge.data('level'),
-                    causality: edge.data('causality'),
-                    notes: edge.data('notes') || "",
-                    mapName: currentMap
+                    source: edge.data('source'), target: edge.data('target'), doi: edge.data('doi'),
+                    level: edge.data('level'), causality: edge.data('causality'), notes: edge.data('notes')||"", mapName: currentMap
                 })
             });
         } catch (error) { console.error("Auto-save failed", error); }
@@ -453,37 +321,78 @@
 
     async function refreshGraph() {
         if (!currentMap) return;
-        const pan = cy.pan();
-        const zoom = cy.zoom();
+        const pan = cy.pan(), zoom = cy.zoom();
         await loadMap(currentMap, currentMapPassword);
-        cy.viewport(zoom, pan);
-        // Re-apply filters after reloading data
-        applyFilters();
+        cy.viewport(zoom, pan); applyFilters();
+    }
+
+    async function exportJSON() {
+        if (!currentMap) { alert("Please load a map first."); return; }
+        try {
+            const response = await fetch(`${API_URL}/map/export`, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ mapName: currentMap, password: currentMapPassword })
+            });
+            if (!response.ok) throw new Error("Export failed");
+            const data = await response.json();
+            const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+            const link = document.createElement("a");
+            link.href = url; link.download = `${currentMap.replace(/\s+/g, '_')}_data.json`;
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        } catch (e) { console.error(e); alert("Export failed."); }
     }
 
     function exportSVG() {
-        if (!currentMap) { alert("No map loaded to export."); return; }
-        if (typeof cy.svg !== 'function') { alert("SVG export functionality is missing."); return; }
-        let filename = prompt("Enter filename for SVG export:", currentMap.replace(/\s+/g, '_') + "_graph");
-        if (filename === null) return;
-        if (filename.trim() === "") filename = "graph_export";
+        if (!currentMap) return alert("No map loaded.");
+        let filename = prompt("Filename:", currentMap.replace(/\s+/g, '_') + "_graph");
+        if (!filename) return;
         if (!filename.endsWith(".svg")) filename += ".svg";
+        const url = URL.createObjectURL(new Blob([cy.svg({ full: true, scale: 1.5, bg: '#ffffff' })], { type: "image/svg+xml;charset=utf-8" }));
+        const link = document.createElement("a");
+        link.href = url; link.download = filename;
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    }
+
+    function importJSON(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try { await sendImportRequest(JSON.parse(e.target.result)); }
+            catch (err) { alert("Invalid JSON file."); }
+            input.value = '';
+        };
+        reader.readAsText(file);
+    }
+
+    async function sendImportRequest(data) {
         try {
-            const svgContent = cy.svg({ full: true, scale: 1.5, bg: '#ffffff' });
-            const blob = new Blob([svgContent], { type: "image/svg+xml;charset=utf-8" });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = filename;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        } catch (e) { console.error("Export failed", e); alert("Failed to export SVG."); }
+            const response = await fetch(`${API_URL}/map/import`, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    mapData: data.map,
+                    nodes: data.nodes,
+                    edges: data.edges
+                })            });
+            if (response.ok) {
+                alert("Map imported successfully!");
+                await initMaps();
+                document.getElementById('map-select').value = data.map.name;
+                loadMap(data.map.name, data.map.password);
+            } else if (response.status === 409) {
+                const newName = prompt(`Map "${data.map.name}" exists. New name:`);
+                if (newName && newName !== data.map.name) {
+                    data.map.name = newName;
+                    await sendImportRequest(data);
+                }
+            } else { alert("Import failed."); }
+        } catch (e) { alert("Network error during import."); }
     }
 
     async function initMaps() {
         try {
             const res = await fetch(`${API_URL}/maps`);
+            if (!res.ok) throw new Error("Failed");
             const maps = await res.json();
             const select = document.getElementById('map-select');
             select.innerHTML = '<option value="" disabled selected>Select a Map...</option>';
@@ -497,21 +406,17 @@
     function handleMapSelect(mapName) {
         if (!mapName) return;
         const password = prompt(`Enter password for map "${mapName}":`);
-        if (password) { loadMap(mapName, password); }
-        else { document.getElementById('map-select').value = ""; }
+        if (password) loadMap(mapName, password);
+        else document.getElementById('map-select').value = "";
     }
 
     async function createNewMap() {
-        const name = prompt("Enter a name for the new Map:");
+        const name = prompt("Name for new Map:");
         if (!name) return;
-        const password = prompt("Set a password for this Map (required for access):");
+        const password = prompt("Set password:");
         if (!password) return;
         try {
-            await fetch(`${API_URL}/maps`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name, password })
-            });
+            await fetch(`${API_URL}/maps`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, password }) });
             await initMaps();
             document.getElementById('map-select').value = name;
             loadMap(name, password);
@@ -519,234 +424,130 @@
     }
 
     async function deleteMap() {
-        if (!currentMap) return;
-        if (!confirm(`Are you sure you want to delete the map "${currentMap}"?`)) return;
-        let password = currentMapPassword;
-        if (!password) { password = prompt(`Enter the password for map "${currentMap}" to confirm deletion:`); }
+        if (!currentMap || !confirm(`Delete map "${currentMap}"?`)) return;
+        let password = currentMapPassword || prompt(`Password for "${currentMap}":`);
         if (!password) return;
         try {
-            const response = await fetch(`${API_URL}/maps`, {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: currentMap, password })
-            });
+            const response = await fetch(`${API_URL}/maps`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: currentMap, password }) });
             if (response.ok) {
-                alert("Map deleted successfully.");
-                currentMap = null; currentMapPassword = null;
-                localStorage.removeItem('evidenceMap');
-                cy.elements().remove();
-                document.getElementById('add-btn').disabled = true;
-                document.getElementById('map-select').value = "";
+                alert("Deleted."); currentMap = null; currentMapPassword = null; localStorage.removeItem('evidenceMap');
+                cy.elements().remove(); document.getElementById('add-btn').disabled = true; document.getElementById('map-select').value = "";
                 await initMaps();
-            } else if (response.status === 403) { alert("Incorrect password. Map not deleted."); }
-            else { alert("Failed to delete map (Server Error)."); }
-        } catch (e) { console.error(e); alert("Network error."); }
+            } else alert("Failed.");
+        } catch (e) { alert("Network error."); }
     }
 
     async function loadMap(mapName, password = null) {
         const pwdToUse = password || currentMapPassword;
         if (!pwdToUse) return;
         try {
-            const response = await fetch(`${API_URL}/graph`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ mapName, password: pwdToUse })
-            });
+            const response = await fetch(`${API_URL}/graph`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mapName, password: pwdToUse }) });
             if (response.status === 403) {
-                alert("Incorrect password.");
-                document.getElementById('map-select').value = "";
-                if(password) currentMapPassword = null;
-                return;
+                alert("Incorrect password."); document.getElementById('map-select').value = "";
+                if(password) currentMapPassword = null; return;
             }
             const data = await response.json();
-            currentMap = mapName; currentMapPassword = pwdToUse;
-            localStorage.setItem('evidenceMap', mapName);
+            currentMap = mapName; currentMapPassword = pwdToUse; localStorage.setItem('evidenceMap', mapName);
             document.getElementById('add-btn').disabled = false;
             cy.elements().remove();
             if (data && data.elements) {
-                const processedElements = data.elements.map(el => {
+                const processed = data.elements.map(el => {
                     if(el.group === 'edges') el.data.id = createCompositeEdgeId(el.data.source, el.data.target, el.data.doi);
                     return el;
                 });
-                cy.add(processedElements);
-                cy.layout(coseLayout).run();
-                applyFilters(); // Apply filters initially
+                cy.add(processed); cy.layout(coseLayout).run(); applyFilters();
             }
         } catch (error) { console.error("Graph load error:", error); }
     }
 
-    window.onload = initMaps;
+    async function addRelationship() {
+        if (!currentMap) return alert("Select a map first.");
+        const s = document.getElementById("source").value.trim(), t = document.getElementById("target").value.trim(), doi = document.getElementById("doi").value.trim();
+        const level = document.getElementById("level").value;
+        if (!s || !t) return alert("Source and Target required.");
+        let meta = { doi: doi || "assumption", title: "Assumption", author: "Unknown", year: "n.d.", journal: "-" };
+        if (level !== 'assumption' && !doi) return alert("DOI required.");
+        try {
+            if (level !== 'assumption') {
+                const r = await fetch(`${API_URL}/doi`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ doi }) });
+                const m = await r.json();
+                if (!m.error) meta = m; else return alert("Invalid DOI");
+            }
+            await fetch(`${API_URL}/save-relationship`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ source: s, target: t, metadata: meta, level, causality: "", mapName: currentMap }) });
+            document.getElementById("source").value = ""; document.getElementById("target").value = ""; document.getElementById("doi").value = "";
+            await refreshGraph();
+        } catch (e) { alert("Error adding relationship."); }
+    }
 
-    const sInput = document.getElementById('source');
-    const tInput = document.getElementById('target');
-    sInput.addEventListener('focus', () => { activePicker = 'source'; cy.$(':selected').unselect(); updateActionsPanel(); });
-    tInput.addEventListener('focus', () => { activePicker = 'target'; cy.$(':selected').unselect(); updateActionsPanel(); });
+    async function saveDefinition() {
+        const n = cy.$('node:selected'); if(!n.length) return;
+        const def = document.getElementById('node-definition').value;
+        try { await fetch(`${API_URL}/node/definition`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: n.id(), definition: def, mapName: currentMap }) }); n.data('definition', def); } catch(e){ alert("Error"); }
+    }
+
+    async function deleteSelected() {
+        const s = cy.$(":selected")[0]; if (!s || !confirm("Delete?")) return;
+        const body = s.isNode() ? { name: s.id(), mapName: currentMap } : { source: s.data('source'), target: s.data('target'), doi: s.data('doi'), mapName: currentMap };
+        const url = `${API_URL}/${s.isNode() ? 'node' : 'relationship'}`;
+        try { if((await fetch(url, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })).ok) { await refreshGraph(); updateActionsPanel(); } } catch(e){}
+    }
+
+    async function renameNode() {
+        const s = cy.$("node:selected")[0]; if(!s) return;
+        const newName = document.getElementById('new-node-name').value.trim();
+        if(newName && newName !== s.id()) {
+            if((await fetch(`${API_URL}/node/rename`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ oldName: s.id(), newName, mapName: currentMap }) })).ok) await refreshGraph();
+        }
+    }
+
+    async function updateEdgeData() {
+        const s = cy.$("edge:selected")[0]; if(!s) return;
+        const level = document.getElementById('new-evidence-level').value, notes = document.getElementById('edge-notes').value;
+        s.data('level', level); s.data('notes', notes);
+        await saveEdgeData(s);
+    }
+
+    function toggleParents() { const s = cy.$("node:selected")[0]; if(s) { const p = s.predecessors(); if(p.length) p.some(e=>e.visible()) ? p.hide() : p.show(); else alert("No upstream factors."); } }
+    function collapseNodes() { const s = cy.$("node:selected")[0]; if(s) { const sc = s.successors(); if(sc.length) sc.some(e=>e.visible()) ? sc.hide() : sc.show(); else alert("No downstream factors."); } }
+
+    const sIn = document.getElementById('source'), tIn = document.getElementById('target');
+    sIn.addEventListener('focus', () => { activePicker = 'source'; cy.$(':selected').unselect(); updateActionsPanel(); });
+    tIn.addEventListener('focus', () => { activePicker = 'target'; cy.$(':selected').unselect(); updateActionsPanel(); });
 
     cy.on("tap", evt => {
-        if (document.activeElement && (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA")) document.activeElement.blur();
-        const target = evt.target;
-        if (target === cy) { cy.$(':selected').unselect(); activePicker = null; }
+        if(document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA") document.activeElement.blur();
+        const t = evt.target;
+        if(t === cy) { cy.$(':selected').unselect(); activePicker = null; }
         else {
-            if (activePicker && target.isNode()) { document.getElementById(activePicker).value = target.id(); activePicker = null; }
-            cy.$(':selected').not(target).unselect(); target.select();
+            if(activePicker && t.isNode()) { document.getElementById(activePicker).value = t.id(); activePicker = null; }
+            cy.$(':selected').not(t).unselect(); t.select();
         }
         updateActionsPanel();
     });
 
     function updateActionsPanel() {
-        document.getElementById('node-actions').style.display = 'none';
-        document.getElementById('edge-actions').style.display = 'none';
+        document.getElementById('node-actions').style.display = 'none'; document.getElementById('edge-actions').style.display = 'none';
         cy.$('.selected').removeClass('selected');
-
-        const selected = cy.$(':selected');
-        const sidebar = document.getElementById('sidebar');
-        const titleEl = document.getElementById('sidebar-title');
-
-        if (selected.length === 1) {
-            selected.addClass('selected');
-            sidebar.style.display = 'flex';
-            requestAnimationFrame(() => cy.resize());
-
-            if (selected.isNode()) {
-                titleEl.innerText = "Factor Details";
+        const s = cy.$(':selected'); const sb = document.getElementById('sidebar');
+        if(s.length === 1) {
+            s.addClass('selected'); sb.style.display = 'flex'; requestAnimationFrame(() => cy.resize());
+            if(s.isNode()) {
+                document.getElementById('sidebar-title').innerText = "Factor Details";
                 document.getElementById('node-actions').style.display = 'flex';
-                document.getElementById('new-node-name').value = selected.data('id');
-                document.getElementById('node-definition').value = selected.data('definition') || '';
-            } else if (selected.isEdge()) {
-                titleEl.innerText = "Evidence Details";
+                document.getElementById('new-node-name').value = s.data('id');
+                document.getElementById('node-definition').value = s.data('definition')||'';
+            } else {
+                document.getElementById('sidebar-title').innerText = "Evidence Details";
                 document.getElementById('edge-actions').style.display = 'flex';
-                document.getElementById('new-evidence-level').value = selected.data('level') || 'observation';
-                document.getElementById('edge-notes').value = selected.data('notes') || '';
-                displayEdgeMetadata(selected.data());
+                document.getElementById('new-evidence-level').value = s.data('level')||'observation';
+                document.getElementById('edge-notes').value = s.data('notes')||'';
+                document.getElementById("edge-metadata-display").innerHTML = `<strong style="color:var(--text-main); font-size:1rem;">${s.data('title')||'Untitled'}</strong><br><br><span style="color:var(--text-light); font-size:0.85rem;">AUTHORS</span><br>${s.data('author')||'Unknown'}<br><span style="color:var(--text-light); font-size:0.85rem; margin-top:5px; display:block;">JOURNAL (${s.data('year')||'n.d.'})</span>${s.data('journal')||'-'}<br><span style="color:var(--text-light); font-size:0.85rem; margin-top:5px; display:block;">DOI</span><a href="https://doi.org/${s.data('doi')}" target="_blank" style="color:#667eea; text-decoration:none;">${s.data('doi')}</a><br>`;
             }
-        } else {
-            sidebar.style.display = 'none';
-            requestAnimationFrame(() => cy.resize());
-        }
-    }
-
-    function displayEdgeMetadata(d) {
-        document.getElementById("edge-metadata-display").innerHTML = `
-            <strong style="color:var(--text-main); font-size:1rem;">${d.title}</strong><br><br>
-            <span style="color:var(--text-light); font-size:0.85rem;">AUTHORS</span><br>${d.author}<br>
-            <span style="color:var(--text-light); font-size:0.85rem; margin-top:5px; display:block;">JOURNAL (${d.year})</span>${d.journal}<br>
-            <span style="color:var(--text-light); font-size:0.85rem; margin-top:5px; display:block;">DOI</span>
-            <a href="https://doi.org/${d.doi}" target="_blank" style="color:#667eea; text-decoration:none;">${d.doi}</a><br>
-        `;
-    }
-
-    async function addRelationship() {
-        if (!currentMap) { alert("Please select or create a map first."); return; }
-        const source = document.getElementById("source").value.trim();
-        const target = document.getElementById("target").value.trim();
-        const doi = document.getElementById("doi").value.trim();
-        const level = document.getElementById("level").value;
-        const causality = "";
-
-        // Allow 'Assumption' to bypass strict DOI requirement if you prefer,
-        // but for now keeping validation. You can use a dummy text for assumption DOI.
-        if (!source || !target) { alert("Please fill Source and Target."); return; }
-
-        // If it's an assumption and no DOI is provided, create a dummy one
-        let meta = { doi: doi || "assumption", title: "Assumption", author: "Unknown", year: "n.d.", journal: "-" };
-
-        if (level !== 'assumption' && !doi) { alert("DOI is required for evidence."); return; }
-
-        try {
-            if (level !== 'assumption') {
-                const r = await fetch(`${API_URL}/doi`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ doi }) });
-                const fetchedMeta = await r.json();
-                if (!fetchedMeta.error) meta = fetchedMeta;
-                else { alert("Invalid DOI"); return; }
-            }
-
-            await fetch(`${API_URL}/save-relationship`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ source, target, metadata: meta, level, causality, mapName: currentMap })
-            });
-            document.getElementById("source").value = ""; document.getElementById("target").value = ""; document.getElementById("doi").value = "";
-            await refreshGraph();
-        } catch (error) { console.error(error); alert("Error adding relationship."); }
-    }
-
-    async function saveDefinition() {
-        const selected = cy.$('node:selected');
-        if (!selected.length) return;
-        try {
-            await fetch(`${API_URL}/node/definition`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: selected.id(), definition: document.getElementById('node-definition').value, mapName: currentMap }) });
-            selected.data('definition', document.getElementById('node-definition').value);
-        } catch (e) { alert("Network error"); }
-    }
-
-    async function deleteSelected() {
-        const selected = cy.$(":selected")[0];
-        if (!selected || !confirm(`Delete this ${selected.isNode() ? "factor" : "relationship"}?`)) return;
-        try {
-            let response;
-            if (selected.isNode()) response = await fetch(`${API_URL}/node`, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: selected.id(), mapName: currentMap }) });
-            else response = await fetch(`${API_URL}/relationship`, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ source: selected.data('source'), target: selected.data('target'), doi: selected.data('doi'), mapName: currentMap }) });
-            if(response.ok) { await refreshGraph(); updateActionsPanel(); }
-        } catch (error) { console.error(error); }
-    }
-
-    async function renameNode() {
-        const selectedNode = cy.$("node:selected")[0];
-        if (!selectedNode) return;
-        const newName = document.getElementById('new-node-name').value.trim();
-        if (!newName || newName === selectedNode.id()) return;
-        try {
-            const response = await fetch(`${API_URL}/node/rename`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ oldName: selectedNode.id(), newName, mapName: currentMap }) });
-            if (response.ok) { await refreshGraph(); if(cy.getElementById(newName).length) { cy.getElementById(newName).select(); updateActionsPanel(); } }
-        } catch (error) { console.error(error); }
-    }
-
-    async function updateEdgeData() {
-        const selectedEdge = cy.$("edge:selected")[0];
-        if (!selectedEdge) return;
-
-        const newLevel = document.getElementById('new-evidence-level').value;
-        const notes = document.getElementById('edge-notes').value;
-        const currentCausality = selectedEdge.data('causality') || "";
-
-        selectedEdge.data('level', newLevel);
-        selectedEdge.data('notes', notes);
-
-        try {
-            const response = await fetch(`${API_URL}/relationship/update`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    source: selectedEdge.data('source'),
-                    target: selectedEdge.data('target'),
-                    doi: selectedEdge.data('doi'),
-                    level: newLevel,
-                    causality: currentCausality,
-                    notes: notes,
-                    mapName: currentMap
-                })
-            });
-            if (response.ok) await refreshGraph();
-        } catch (error) { console.error(error); }
-    }
-
-    function toggleParents() {
-        const s = cy.$("node:selected")[0];
-        if(!s) return;
-        const parents = s.predecessors();
-        if(parents.length === 0) { alert("No upstream factors found."); return; }
-        if(parents.some(e => e.visible())) { parents.hide(); } else { parents.show(); }
-    }
-
-    function collapseNodes() {
-        const s = cy.$("node:selected")[0];
-        if(!s) return;
-        const successors = s.successors();
-        if(successors.length === 0) { alert("No downstream factors found."); return; }
-        if(successors.some(e => e.visible())) { successors.hide(); } else { successors.show(); }
+        } else { sb.style.display = 'none'; requestAnimationFrame(() => cy.resize()); }
     }
 
     document.addEventListener("keydown", e => { if ((e.key === "Delete" || e.key === "Backspace") && !["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) deleteSelected(); });
+    window.onload = initMaps;
 </script>
 </body>
 </html>
