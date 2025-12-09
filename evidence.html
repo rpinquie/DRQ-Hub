@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Evidence-Based Map</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* GLOBAL VARIABLES & RESET */
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%);
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-main: #2d3748;
+            --text-light: #718096;
+            --border-color: #e2e8f0;
+        }
+
+        html, body {
+            height: 100%; margin: 0; padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+
+        #import-file { display: none; }
+
+        /* HEADER STYLES */
+        header {
+            background-color: var(--card-bg);
+            padding: 15px 30px;
+            border-bottom: 1px solid var(--border-color); flex-shrink: 0;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+
+        .brand-hub {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 2px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .page-title { margin: 0; font-size: 1.5rem; font-weight: 800; color: #1a202c; letter-spacing: -0.5px; }
+
+        /* NAVIGATION & CONTROLS */
+        #map-controls { display: flex; gap: 12px; align-items: center; }
+
+        .nav-link {
+            text-decoration: none; font-weight: 600; font-size: 0.9rem;
+            padding: 8px 16px; border-radius: 20px;
+            color: var(--text-light); transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        .nav-link:hover { background-color: #edf2f7; color: #4a5568; }
+
+        .divider { width: 1px; height: 24px; background: var(--border-color); margin: 0 5px; }
+
+        /* BUTTONS */
+        button {
+            border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
+            padding: 8px 16px; font-family: 'Poppins', sans-serif; font-size: 0.85rem;
+            transition: transform 0.1s, box-shadow 0.2s;
+        }
+        button:active { transform: translateY(1px); }
+
+        .btn-primary { background: var(--primary-gradient); color: white; box-shadow: 0 4px 6px rgba(118, 75, 162, 0.3); }
+        .btn-accent { background: var(--secondary-gradient); color: white; box-shadow: 0 4px 6px rgba(255, 75, 43, 0.3); }
+        .btn-warning { background-color: #fff5f5; color: #c53030; border: 1px solid #feb2b2; }
+        .btn-warning:hover { background-color: #fed7d7; }
+        .btn-secondary { background-color: #fff; border: 1px solid var(--border-color); color: var(--text-main); }
+        .btn-secondary:hover { background-color: #f7fafc; }
+
+        select, input, textarea {
+            padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e0;
+            font-family: 'Poppins', sans-serif; font-size: 0.9rem; outline: none;
+            transition: border-color 0.2s;
+        }
+        select:focus, input:focus, textarea:focus { border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+
+        /* LAYOUT */
+        #controls {
+            padding: 15px 30px; background-color: #ffffff;
+            border-bottom: 1px solid var(--border-color); display: flex;
+            gap: 15px; align-items: flex-end; flex-wrap: wrap; flex-shrink: 0;
+        }
+
+        .filter-section {
+            border-left: 1px solid var(--border-color); padding-left: 15px; margin-left: 10px;
+            display: flex; flex-direction: column; gap: 4px;
+        }
+        .filter-group { display: flex; gap: 12px; align-items: center; }
+        .filter-option { display: flex; align-items: center; gap: 5px; font-size: 0.8rem; color: var(--text-main); cursor: pointer; user-select: none; font-weight: 500; }
+        .filter-option input { margin: 0; padding: 0; width: auto; cursor: pointer; }
+
+        #main-view { display: flex; flex-grow: 1; position: relative; overflow: hidden; width: 100%; }
+        #cy { flex-grow: 1; background-color: #ffffff; min-width: 0; transition: width 0.3s ease; }
+        #sidebar {
+            width: 380px; min-width: 380px; background-color: #ffffff; border-left: 1px solid var(--border-color);
+            display: none; flex-direction: column; flex-shrink: 0; overflow-y: auto; box-shadow: -4px 0 15px rgba(0,0,0,0.05); z-index: 20;
+        }
+
+        .panel { padding: 25px; }
+        h3 { margin-top: 0; font-size: 1.1em; color: var(--text-main); font-weight: 600; border-bottom: 2px solid #edf2f7; padding-bottom: 10px; margin-bottom: 20px;}
+        .action-group { display: flex; flex-direction: column; gap: 20px; }
+        label { font-weight: 600; font-size: 0.8rem; color: #718096; margin-bottom: 6px; display: block; text-transform: uppercase; }
+        textarea { min-height: 100px; width: 100%; box-sizing: border-box; resize: vertical; }
+
+        #map-select { width: 220px; }
+        #controls input.text-input { width: 140px; }
+        .edge-details { background: #f7fafc; padding: 15px; border-radius: 8px; border: 1px solid #edf2f7; font-size: 0.9rem; line-height: 1.6; }
+        .selected { border-width: 4px !important; border-color: #F6E05E !important; }
+
+        #fit-btn {
+            position: absolute; bottom: 20px; left: 20px; z-index: 10;
+            width: 45px; height: 45px; border-radius: 50%; background: #fff; color: #2d3748;
+            border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; padding: 0;
+        }
+        #fit-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 8px rgba(0,0,0,0.15); color: #667eea; }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div style="display:flex; flex-direction:column;">
+        <a href="index.html" class="brand-hub">Design Research Quality Hub</a>
+        <h2 class="page-title">Evidence-Based Map</h2>
+    </div>
+    <div id="map-controls">
+        <a href="resources.html" class="nav-link">Design Quality Resources</a>
+        <div class="divider"></div>
+        <select id="map-select" onchange="handleMapSelect(this.value)">
+            <option value="" disabled selected>Select a Map...</option>
+        </select>
+        <button class="btn-primary" onclick="createNewMap()">+ New Map</button>
+        <button class="btn-secondary" onclick="exportJSON()" title="Download Map Data"><i class="fas fa-file-export"></i> JSON</button>
+        <button class="btn-secondary" onclick="document.getElementById('import-file').click()" title="Import Map Data"><i class="fas fa-file-import"></i> Import</button>
+        <input type="file" id="import-file" accept=".json" onchange="importJSON(this)">
+        <button class="btn-warning" onclick="deleteMap()"><i class="fas fa-trash"></i></button>
+        <button class="btn-accent" onclick="exportSVG()">Export SVG</button>
+    </div>
+</header>
+
+<div id="controls">
+    <div style="display:flex; flex-direction:column; gap:2px;">
+        <label style="margin:0; font-size:0.7rem;">Source</label>
+        <input id="source" class="text-input" placeholder="Factor A">
+    </div>
+    <div style="display:flex; flex-direction:column; gap:2px;">
+        <label style="margin:0; font-size:0.7rem;">Target</label>
+        <input id="target" class="text-input" placeholder="Factor B">
+    </div>
+    <div style="display:flex; flex-direction:column; gap:2px;">
+        <label style="margin:0; font-size:0.7rem;">Reference DOI</label>
+        <input id="doi" class="text-input" placeholder="10.xxxx/....">
+    </div>
+    <div style="display:flex; flex-direction:column; gap:2px;">
+        <label style="margin:0; font-size:0.7rem;">Evidence Level</label>
+        <select id="level">
+            <option value="experiment">Experiment</option>
+            <option value="observation">Observation</option>
+            <option value="expert opinion">Expert Opinion</option>
+            <option value="assumption">Assumption</option>
+        </select>
+    </div>
+    <button class="btn-primary" id="add-btn" onclick="addRelationship()" style="height: 38px; margin-bottom: 2px;" disabled>Add Evidence</button>
+
+    <!-- LEVEL FILTER -->
+    <div class="filter-section">
+        <label style="margin:0; font-size:0.7rem;">Filter Level</label>
+        <div class="filter-group">
+            <label class="filter-option"><input type="checkbox" class="filter-level" value="experiment" checked onchange="applyFilters()"><span style="color:#48BB78; font-weight:800;">●</span> Exp</label>
+            <label class="filter-option"><input type="checkbox" class="filter-level" value="observation" checked onchange="applyFilters()"><span style="color:#ECC94B; font-weight:800;">●</span> Obs</label>
+            <label class="filter-option"><input type="checkbox" class="filter-level" value="expert opinion" checked onchange="applyFilters()"><span style="color:#F56565; font-weight:800;">●</span> Ops</label>
+            <label class="filter-option"><input type="checkbox" class="filter-level" value="assumption" checked onchange="applyFilters()"><span style="color:#A0AEC0; font-weight:800;">--</span> Assump</label>
+        </div>
+    </div>
+
+    <!-- CAUSALITY FILTER -->
+    <div class="filter-section">
+        <label style="margin:0; font-size:0.7rem;">Filter Causality</label>
+        <div class="filter-group">
+            <label class="filter-option"><input type="checkbox" class="filter-causality" value="++" checked onchange="applyFilters()"> ++</label>
+            <label class="filter-option"><input type="checkbox" class="filter-causality" value="--" checked onchange="applyFilters()"> --</label>
+            <label class="filter-option"><input type="checkbox" class="filter-causality" value="+-" checked onchange="applyFilters()"> +-</label>
+            <label class="filter-option"><input type="checkbox" class="filter-causality" value="-+" checked onchange="applyFilters()"> -+</label>
+            <label class="filter-option"><input type="checkbox" class="filter-causality" value="" checked onchange="applyFilters()"> None</label>
+        </div>
+    </div>
+</div>
+
+<div id="main-view">
+    <div id="cy"></div>
+    <button id="fit-btn" onclick="fitGraph()" title="Fit Graph to View"><i class="fas fa-compress-arrows-alt" style="font-size: 1.2rem;"></i></button>
+
+    <div id="sidebar">
+        <div id="actions" class="panel">
+            <h3 id="sidebar-title">Selection Details</h3>
+            <div id="node-actions" class="action-group" style="display:none;">
+                <div>
+                    <label>Rename Factor</label>
+                    <div style="display:flex; gap:5px;"><input id="new-node-name" style="flex-grow:1;"><button class="btn-secondary" onclick="renameNode()">Save</button></div>
+                </div>
+                <div>
+                    <label>Definition</label>
+                    <textarea id="node-definition" placeholder="Enter definition..."></textarea>
+                    <button class="btn-primary" onclick="saveDefinition()" style="margin-top:8px; width:100%;">Save Definition</button>
+                </div>
+                <div>
+                    <label>Visual Tools</label>
+                    <div style="display:flex; gap:5px;">
+                        <button class="btn-secondary" style="flex:1;" onclick="toggleParents()">Show Upstream</button>
+                        <button class="btn-secondary" style="flex:1;" onclick="collapseNodes()">Show Downstream</button>
+                    </div>
+                </div>
+                <button class="btn-warning" onclick="deleteSelected()">Delete Factor</button>
+            </div>
+            <div id="edge-actions" class="action-group" style="display:none;">
+                <div id="edge-metadata-display" class="edge-details"></div>
+                <div><label>Notes</label><textarea id="edge-notes" placeholder="Add comments here..." style="min-height: 80px;"></textarea></div>
+                <div>
+                    <label>Update Relationship</label>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <select id="new-evidence-level" style="width:100%;">
+                            <option value="experiment">Experiment</option>
+                            <option value="observation">Observation</option>
+                            <option value="expert opinion">Expert Opinion</option>
+                            <option value="assumption">Assumption</option>
+                        </select>
+                        <button class="btn-primary" style="flex-grow:1;" onclick="updateEdgeData()">Update</button>
+                    </div>
+                </div>
+                <button class="btn-warning" onclick="deleteSelected()">Delete Relationship</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = "http://localhost:3001";
+    let currentMap = null;
+    let currentMapPassword = null;
+    let activePicker = null;
+
+    function createCompositeEdgeId(source, target, doi) {
+        return `${(source||"").replace(/[^a-zA-Z0-9]/g, '')}_${(target||"").replace(/[^a-zA-Z0-9]/g, '')}_${(doi||"").replace(/[^a-zA-Z0-9]/g, '')}`;
+    }
+
+    const coseLayout = { name: 'cose', padding: 50, animate: true, idealEdgeLength: 100, nodeOverlap: 20, componentSpacing: 40, nodeRepulsion: 400000, stop: function(){ cy.fit(); cy.center(); } };
+
+    const cy = cytoscape({
+        container: document.getElementById('cy'),
+        elements: [],
+        layout: coseLayout,
+        style: [
+            {
+                selector: 'node',
+                style: {
+                    'shape': 'round-rectangle', 'background-color': '#fff', 'border-width': 2, 'border-color': '#667eea',
+                    'label': 'data(label)', 'color': '#2d3748', 'text-valign': 'center', 'text-halign': 'center', 'font-weight': '600',
+                    'font-family': 'Poppins', 'padding': '12px', 'width': 'label', 'height': 'label', 'text-wrap': 'wrap', 'text-max-width': '120px',
+                }
+            },
+            { selector: 'node.selected', style: { 'border-width': 4, 'border-color': '#F6E05E', 'background-color': '#ebf8ff' } },
+            {
+                selector: 'edge',
+                style: {
+                    'curve-style': 'bezier', 'target-arrow-shape': 'triangle', 'width': 2, 'line-color': '#cbd5e0', 'target-arrow-color': '#cbd5e0',
+                    'label': function(ele) {
+                        const a = ele.data('author')||'Unknown', y = ele.data('year')||'n.d.';
+                        return (ele.data('level')==='assumption' && a==='Unknown') ? 'Assumption' : `${a.split(',')[0]} (${y})`;
+                    },
+                    'font-size': '10px', 'font-family': 'Poppins', 'text-rotation': 'autorotate', 'text-background-color': '#fff',
+                    'text-background-opacity': 1, 'text-background-padding': '2px', 'color': '#718096',
+                    'source-label': e => (e.data('causality')||[]).length===2 ? e.data('causality')[0] : '', 'source-text-offset': 30,
+                    'target-label': e => (e.data('causality')||[]).length===2 ? e.data('causality')[1] : '', 'target-text-offset': 30,
+                    'font-weight': 'bold', 'text-margin-y': -5
+                }
+            },
+            { selector: 'edge[level="experiment"]', style: { 'line-color': '#48BB78', 'target-arrow-color': '#48BB78' } },
+            { selector: 'edge[level="observation"]', style: { 'line-color': '#ECC94B', 'target-arrow-color': '#ECC94B' } },
+            { selector: 'edge[level="expert opinion"]', style: { 'line-color': '#F56565', 'target-arrow-color': '#F56565' } },
+            { selector: 'edge[level="assumption"]', style: { 'line-color': '#A0AEC0', 'target-arrow-color': '#A0AEC0', 'line-style': 'dashed' } },
+            { selector: 'edge[causality="++"]', style: { 'color': '#48BB78' } },
+            { selector: 'edge[causality="--"]', style: { 'color': '#F56565' } },
+            { selector: 'edge.selected', style: { 'width': 4, 'line-color': '#4A5568', 'target-arrow-color': '#4A5568', 'z-index': 999 } },
+            { selector: 'edge.filtered-hidden', style: { 'display': 'none' } }
+        ],
+        wheelSensitivity: 0.2
+    });
+
+    // --- LOGIC ---
+    function applyFilters() {
+        // Collect active values from both filter sets
+        const activeLevels = Array.from(document.querySelectorAll('.filter-level')).filter(cb => cb.checked).map(cb => cb.value);
+        const activeCausality = Array.from(document.querySelectorAll('.filter-causality')).filter(cb => cb.checked).map(cb => cb.value);
+
+        cy.batch(() => {
+            cy.edges().forEach(edge => {
+                const level = edge.data('level');
+                const causality = edge.data('causality') || "";
+
+                // Edge is shown only if it passes BOTH filters
+                if (activeLevels.includes(level) && activeCausality.includes(causality)) {
+                    edge.removeClass('filtered-hidden');
+                } else {
+                    edge.addClass('filtered-hidden');
+                }
+            });
+        });
+    }
+
+    cy.on('cxttap', 'edge', async function(evt){
+        const edge = evt.target;
+        const map = {"":"++", "++":"+-", "+-":"-+", "-+":"--", "--":""};
+        edge.data('causality', map[edge.data('causality')||""] || "");
+        await saveEdgeData(edge);
+        // Re-apply filters because changing causality might hide it if that type is filtered out
+        applyFilters();
+    });
+
+    async function saveEdgeData(edge) {
+        try {
+            await fetch(`${API_URL}/relationship/update`, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    source: edge.data('source'), target: edge.data('target'), doi: edge.data('doi'),
+                    level: edge.data('level'), causality: edge.data('causality'), notes: edge.data('notes')||"", mapName: currentMap
+                })
+            });
+        } catch (error) { console.error("Auto-save failed", error); }
+    }
+
+    function fitGraph() { cy.fit(); cy.center(); }
+
+    async function refreshGraph() {
+        if (!currentMap) return;
+        const pan = cy.pan(), zoom = cy.zoom();
+        await loadMap(currentMap, currentMapPassword);
+        cy.viewport(zoom, pan); applyFilters();
+    }
+
+    async function exportJSON() {
+        if (!currentMap) {
+            alert("Please load a map first.");
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/map/export`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ mapName: currentMap, password: currentMapPassword })
+            });
+
+            if (!response.ok) throw new Error("Export failed");
+
+            const data = await response.json();
+            const jsonString = JSON.stringify(data, null, 2);
+            const fileName = `${currentMap.replace(/\s+/g, '_')}_data.json`;
+
+            // --- Preferred: File System Access API ---
+            if (window.showDirectoryPicker) {
+                try {
+                    const dirHandle = await window.showDirectoryPicker();
+                    const fileHandle = await dirHandle.getFileHandle(fileName, { create: true });
+                    const writable = await fileHandle.createWritable();
+                    await writable.write(jsonString);
+                    await writable.close();
+                    alert("Exported successfully!");
+                    return;
+                } catch (err) {
+                    console.warn("Directory picker failed, falling back to download.", err);
+                }
+            }
+
+            // --- Fallback for unsupported browsers ---
+            const url = URL.createObjectURL(
+                new Blob([jsonString], { type: "application/json" })
+            );
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = fileName;
+            link.click();
+
+        } catch (e) {
+            console.error(e);
+            alert("Export failed.");
+        }
+    }
+
+    function exportSVG() {
+        if (!currentMap) return alert("No map loaded.");
+        if (typeof cy.svg !== 'function') return alert("SVG export not supported by this library version.");
+
+        let filename = prompt("Filename:", currentMap.replace(/\s+/g, '_') + "_graph");
+        if (!filename) return;
+        if (!filename.endsWith(".svg")) filename += ".svg";
+        const url = URL.createObjectURL(new Blob([cy.svg({ full: true, scale: 1.5, bg: '#ffffff' })], { type: "image/svg+xml;charset=utf-8" }));
+        const link = document.createElement("a");
+        link.href = url; link.download = filename;
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    }
+
+    function importJSON(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try { await sendImportRequest(JSON.parse(e.target.result)); }
+            catch (err) { alert("Invalid JSON file."); }
+            input.value = '';
+        };
+        reader.readAsText(file);
+    }
+
+    async function sendImportRequest(data) {
+        try {
+            const response = await fetch(`${API_URL}/map/import`, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    mapData: data.map,
+                    nodes: data.nodes,
+                    edges: data.edges
+                })            });
+            if (response.ok) {
+                alert("Map imported successfully!");
+                await initMaps();
+                document.getElementById('map-select').value = data.map.name;
+                loadMap(data.map.name, data.map.password);
+            } else if (response.status === 409) {
+                const newName = prompt(`Map "${data.map.name}" exists. New name:`);
+                if (newName && newName !== data.map.name) {
+                    data.map.name = newName;
+                    await sendImportRequest(data);
+                }
+            } else { alert("Import failed."); }
+        } catch (e) { alert("Network error during import."); }
+    }
+
+    async function initMaps() {
+        try {
+            const res = await fetch(`${API_URL}/maps`);
+            if (!res.ok) throw new Error("Failed");
+            const maps = await res.json();
+            const select = document.getElementById('map-select');
+            select.innerHTML = '<option value="" disabled selected>Select a Map...</option>';
+            maps.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m; opt.innerText = m; select.appendChild(opt);
+            });
+        } catch (e) { console.error("Error loading maps", e); }
+    }
+
+    function handleMapSelect(mapName) {
+        if (!mapName) return;
+        const password = prompt(`Enter password for map "${mapName}":`);
+        if (password) loadMap(mapName, password);
+        else document.getElementById('map-select').value = "";
+    }
+
+    async function createNewMap() {
+        const name = prompt("Name for new Map:");
+        if (!name) return;
+        const password = prompt("Set password:");
+        if (!password) return;
+        try {
+            await fetch(`${API_URL}/maps`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, password }) });
+            await initMaps();
+            document.getElementById('map-select').value = name;
+            loadMap(name, password);
+        } catch (e) { alert("Failed to create map"); }
+    }
+
+    async function deleteMap() {
+        if (!currentMap || !confirm(`Delete map "${currentMap}"?`)) return;
+        let password = currentMapPassword || prompt(`Password for "${currentMap}":`);
+        if (!password) return;
+        try {
+            const response = await fetch(`${API_URL}/maps`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: currentMap, password }) });
+            if (response.ok) {
+                alert("Deleted."); currentMap = null; currentMapPassword = null; localStorage.removeItem('evidenceMap');
+                cy.elements().remove(); document.getElementById('add-btn').disabled = true; document.getElementById('map-select').value = "";
+                await initMaps();
+            } else alert("Failed.");
+        } catch (e) { alert("Network error."); }
+    }
+
+    async function loadMap(mapName, password = null) {
+        const pwdToUse = password || currentMapPassword;
+        if (!pwdToUse) return;
+        try {
+            const response = await fetch(`${API_URL}/graph`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mapName, password: pwdToUse }) });
+            if (response.status === 403) {
+                alert("Incorrect password."); document.getElementById('map-select').value = "";
+                if(password) currentMapPassword = null; return;
+            }
+            const data = await response.json();
+            currentMap = mapName; currentMapPassword = pwdToUse; localStorage.setItem('evidenceMap', mapName);
+            document.getElementById('add-btn').disabled = false;
+            cy.elements().remove();
+            if (data && data.elements) {
+                const processed = data.elements.map(el => {
+                    if(el.group === 'edges') el.data.id = createCompositeEdgeId(el.data.source, el.data.target, el.data.doi);
+                    return el;
+                });
+                cy.add(processed); cy.layout(coseLayout).run(); applyFilters();
+            }
+        } catch (error) { console.error("Graph load error:", error); }
+    }
+
+    async function addRelationship() {
+        if (!currentMap) return alert("Select a map first.");
+
+        const s = document.getElementById("source").value.trim();
+        const t = document.getElementById("target").value.trim();
+        const doi = document.getElementById("doi").value.trim();
+        const level = document.getElementById("level").value;
+
+        if (!s || !t) return alert("Source and Target required.");
+
+        // ---- RULE: DOI required except for "assumption" ----
+        if (level !== "assumption" && !doi) {
+            return alert("A DOI is required for all evidence types except 'assumption'.");
+        }
+
+        // Default metadata (used for assumption or DOI failures)
+        let meta = {
+            doi: doi || "assumption",
+            title: level === "assumption" ? "Assumption" : "Unknown Title",
+            author: "Unknown",
+            year: "n.d.",
+            journal: "-"
+        };
+
+        try {
+            // Only lookup DOI when provided
+            if (doi) {
+                const r = await fetch(`${API_URL}/doi`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ doi })
+                });
+
+                const m = await r.json();
+
+                // If DOI lookup fails → block unless assumption
+                if (m.error) {
+                    if (level === "assumption") {
+                        // assumptions skip DOI validation entirely
+                        console.warn("Invalid DOI, but allowed for assumptions.");
+                    } else {
+                        return alert("Invalid DOI.");
+                    }
+                } else {
+                    meta = m; // valid DOI → use fetched metadata
+                }
+            }
+
+            await fetch(`${API_URL}/save-relationship`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    source: s,
+                    target: t,
+                    metadata: meta,
+                    level,
+                    causality: "",
+                    mapName: currentMap
+                })
+            });
+
+            // Reset inputs
+            document.getElementById("source").value = "";
+            document.getElementById("target").value = "";
+            document.getElementById("doi").value = "";
+
+            await refreshGraph();
+
+        } catch (e) {
+            alert("Error adding relationship.");
+        }
+    }
+
+    async function saveDefinition() {
+        const n = cy.$('node:selected'); if(!n.length) return;
+        const def = document.getElementById('node-definition').value;
+        try { await fetch(`${API_URL}/node/definition`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: n.id(), definition: def, mapName: currentMap }) }); n.data('definition', def); } catch(e){ alert("Error"); }
+    }
+
+    async function deleteSelected() {
+        const s = cy.$(":selected")[0]; if (!s || !confirm("Delete?")) return;
+        const body = s.isNode() ? { name: s.id(), mapName: currentMap } : { source: s.data('source'), target: s.data('target'), doi: s.data('doi'), mapName: currentMap };
+        const url = `${API_URL}/${s.isNode() ? 'node' : 'relationship'}`;
+        try { if((await fetch(url, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })).ok) { await refreshGraph(); updateActionsPanel(); } } catch(e){}
+    }
+
+    async function renameNode() {
+        const s = cy.$("node:selected")[0]; if(!s) return;
+        const newName = document.getElementById('new-node-name').value.trim();
+        if(newName && newName !== s.id()) {
+            if((await fetch(`${API_URL}/node/rename`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ oldName: s.id(), newName, mapName: currentMap }) })).ok) await refreshGraph();
+        }
+    }
+
+    async function updateEdgeData() {
+        const s = cy.$("edge:selected")[0]; if(!s) return;
+        const level = document.getElementById('new-evidence-level').value, notes = document.getElementById('edge-notes').value;
+        s.data('level', level); s.data('notes', notes);
+        await saveEdgeData(s);
+    }
+
+    function toggleParents() { const s = cy.$("node:selected")[0]; if(s) { const p = s.predecessors(); if(p.length) p.some(e=>e.visible()) ? p.hide() : p.show(); else alert("No upstream factors."); } }
+    function collapseNodes() { const s = cy.$("node:selected")[0]; if(s) { const sc = s.successors(); if(sc.length) sc.some(e=>e.visible()) ? sc.hide() : sc.show(); else alert("No downstream factors."); } }
+
+    const sIn = document.getElementById('source'), tIn = document.getElementById('target');
+    sIn.addEventListener('focus', () => { activePicker = 'source'; cy.$(':selected').unselect(); updateActionsPanel(); });
+    tIn.addEventListener('focus', () => { activePicker = 'target'; cy.$(':selected').unselect(); updateActionsPanel(); });
+
+    cy.on("tap", evt => {
+        if(document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA") document.activeElement.blur();
+        const t = evt.target;
+        if(t === cy) { cy.$(':selected').unselect(); activePicker = null; }
+        else {
+            if(activePicker && t.isNode()) { document.getElementById(activePicker).value = t.id(); activePicker = null; }
+            cy.$(':selected').not(t).unselect(); t.select();
+        }
+        updateActionsPanel();
+    });
+
+    function updateActionsPanel() {
+        document.getElementById('node-actions').style.display = 'none'; document.getElementById('edge-actions').style.display = 'none';
+        cy.$('.selected').removeClass('selected');
+        const s = cy.$(':selected'); const sb = document.getElementById('sidebar');
+        if(s.length === 1) {
+            s.addClass('selected'); sb.style.display = 'flex'; requestAnimationFrame(() => cy.resize());
+            if(s.isNode()) {
+                document.getElementById('sidebar-title').innerText = "Factor Details";
+                document.getElementById('node-actions').style.display = 'flex';
+                document.getElementById('new-node-name').value = s.data('id');
+                document.getElementById('node-definition').value = s.data('definition')||'';
+            } else {
+                document.getElementById('sidebar-title').innerText = "Evidence Details";
+                document.getElementById('edge-actions').style.display = 'flex';
+                document.getElementById('new-evidence-level').value = s.data('level')||'observation';
+                document.getElementById('edge-notes').value = s.data('notes')||'';
+                document.getElementById("edge-metadata-display").innerHTML = `<strong style="color:var(--text-main); font-size:1rem;">${s.data('title')||'Untitled'}</strong><br><br><span style="color:var(--text-light); font-size:0.85rem;">AUTHORS</span><br>${s.data('author')||'Unknown'}<br><span style="color:var(--text-light); font-size:0.85rem; margin-top:5px; display:block;">JOURNAL (${s.data('year')||'n.d.'})</span>${s.data('journal')||'-'}<br><span style="color:var(--text-light); font-size:0.85rem; margin-top:5px; display:block;">DOI</span><a href="https://doi.org/${s.data('doi')}" target="_blank" style="color:#667eea; text-decoration:none;">${s.data('doi')}</a><br>`;
+            }
+        } else { sb.style.display = 'none'; requestAnimationFrame(() => cy.resize()); }
+    }
+
+    document.addEventListener("keydown", e => { if ((e.key === "Delete" || e.key === "Backspace") && !["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) deleteSelected(); });
+    window.onload = initMaps;
+</script>
+</body>
+</html>

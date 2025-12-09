@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Design Research Quality Resources</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* GLOBAL STYLES */
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%);
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-main: #2d3748;
+            --border-color: #e2e8f0;
+            --cell-plus: #d1fae5; /* Light Green */
+            --cell-minus: #fee2e2; /* Light Red */
+            --cell-o: #fef3c7; /* Light Yellow */
+            --cell-neutral: #ffffff;
+            --risk-bg: #e53e3e;
+            --risk-text: #fff;
+        }
+
+        html, body {
+            height: 100%; margin: 0; padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+
+        /* HEADER */
+        header {
+            background-color: var(--card-bg);
+            padding: 15px 30px;
+            border-bottom: 1px solid var(--border-color); flex-shrink: 0;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+
+        .brand-hub {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 2px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .page-title { margin: 0; font-size: 1.5rem; font-weight: 800; color: #1a202c; letter-spacing: -0.5px; }
+        .nav-link { text-decoration: none; font-weight: 600; font-size: 0.9rem; padding: 8px 16px; border-radius: 20px; color: #718096; transition: all 0.2s; }
+        .nav-link:hover { background-color: #edf2f7; color: #4a5568; }
+
+        /* ERROR BANNER */
+        #connection-status {
+            display: none;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+            z-index: 100;
+        }
+        .status-error { background-color: #fff5f5; color: #c53030; border-bottom: 1px solid #fed7d7; }
+        .status-offline { background-color: #ebf8ff; color: #2b6cb0; border-bottom: 1px solid #bee3f8; }
+
+        /* FILTERS & LAYOUT */
+        .filters-container { display: flex; align-items: center; gap: 20px; }
+        .filter-group { display: flex; flex-direction: column; gap: 2px; }
+        .filter-label { font-size: 0.75rem; font-weight: 700; color: #a0aec0; text-transform: uppercase; }
+        .class-selector { padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e0; font-family: 'Poppins'; font-weight: 600; color: #2d3748; outline: none; cursor: pointer; background: #fff; font-size: 0.9rem; min-width: 160px; }
+
+        #content-wrapper { display: flex; flex-grow: 1; overflow: hidden; position: relative; width: 100%; }
+        #table-container { flex-grow: 1; overflow: auto; padding: 40px; transition: margin-right 0.3s ease; width: 100%; }
+
+        table { border-collapse: separate; border-spacing: 0; background: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 8px; }
+        th, td { border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); padding: 8px; text-align: center; font-size: 0.85rem; position: relative; }
+
+        thead th { position: sticky; top: 0; z-index: 20; background-color: #f7fafc; border-top: 1px solid var(--border-color); }
+        tbody td.sticky-col-1, tfoot td.sticky-col-1 { position: sticky; left: 0; z-index: 10; background-color: #f7fafc; width: 150px; min-width: 150px; max-width: 150px; border-left: 1px solid var(--border-color); vertical-align: top; }
+        tbody td.sticky-col-2, tfoot td.sticky-col-2 { position: sticky; left: 150px; z-index: 10; background-color: #f7fafc; width: 200px; min-width: 200px; max-width: 200px; border-right: 2px solid #cbd5e0; }
+        tfoot td { position: sticky; bottom: 0; z-index: 15; background-color: #fff9f9 !important; border-top: 2px solid #cbd5e0; }
+        tfoot td.sticky-col-1, tfoot td.sticky-col-2 { z-index: 16; background-color: var(--risk-bg) !important; color: var(--risk-text); }
+        thead th.corner-header { position: sticky; top: 0; left: 0; z-index: 30; background-color: #edf2f7; text-align: left; padding: 10px; border-left: 1px solid var(--border-color); }
+        thead th.method-col { min-width: 160px; vertical-align: top; }
+
+        /* STATIC TEXT (Read-Only) */
+        .static-text {
+            font-weight: 600; color: #2d3748; display: block; width: 100%;
+            word-wrap: break-word; white-space: normal;
+        }
+
+        /* NEW: Strong Visual Clue for Definitions */
+        .definition-tooltip {
+            cursor: help;
+            text-decoration: underline;
+            text-decoration-style: dotted;
+            text-decoration-color: #667eea;
+            text-decoration-thickness: 2px;
+            text-underline-offset: 3px;
+            position: relative;
+        }
+        .definition-tooltip:hover {
+            color: #667eea;
+            background-color: #f0f4ff;
+            border-radius: 4px;
+        }
+        /* Add (i) icon via pseudo-element */
+        .definition-tooltip::after {
+            content: "\f05a"; /* FontAwesome info-circle */
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+            font-size: 0.7em;
+            color: #667eea;
+            margin-left: 4px;
+            vertical-align: super;
+            opacity: 0.7;
+        }
+
+        .static-risk {
+            font-size: 0.75rem; color: #4a5568; font-style: italic; line-height: 1.4;
+            text-align: left;
+        }
+
+        /* CELLS */
+        .data-cell { cursor: pointer; font-weight: 700; font-size: 1.4rem; height: 80px; transition: background 0.1s; vertical-align: middle; }
+        .data-cell[data-suitability="+"] { background-color: var(--cell-plus); }
+        .data-cell[data-suitability="-"] { background-color: var(--cell-minus); }
+        .data-cell[data-suitability="o"] { background-color: var(--cell-o); }
+        .data-cell[data-suitability=""] { background-color: var(--cell-neutral); }
+        .data-cell:hover { filter: brightness(0.95); }
+
+        .method-block { margin-bottom: 2px; padding: 2px; font-size: 0.8rem; color: #2d3748; font-weight: 600; display:flex; justify-content:center; align-items:center; gap:5px;}
+        .method-link-icon { font-size: 0.7rem; color: #667eea; opacity:0.7; cursor: pointer; }
+        .method-link-icon:hover { opacity:1; transform: scale(1.1); }
+
+        .info-icon { color: #667eea; font-size: 0.8rem; margin-left: 5px; cursor: pointer; opacity: 0.6; position: relative; display: inline-block; }
+
+        /* SIDEBAR */
+        #sidebar { width: 420px; min-width: 420px; background-color: #ffffff; border-left: 1px solid var(--border-color); display: flex; flex-direction: column; box-shadow: -4px 0 20px rgba(0,0,0,0.08); z-index: 50; position: absolute; top: 0; bottom: 0; right: 0; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        #sidebar.open { transform: translateX(0); }
+        .sidebar-header { padding: 20px; background: #fff; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .suitability-panel { padding: 20px; background: #fafafa; border-bottom: 1px solid var(--border-color); }
+
+        .methods-list-container { padding: 20px; background: #fff; border-bottom: 1px solid var(--border-color); flex-grow: 1; overflow-y: auto; }
+        .method-item { padding: 15px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 12px; transition: all 0.2s; display: flex; flex-direction: column; gap: 8px; }
+        .method-item:hover { border-color: #cbd5e0; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .method-item-header { display: flex; justify-content: space-between; align-items: center; }
+
+        .btn-explore {
+            background: var(--secondary-gradient); color: white; border: none; padding: 8px 12px; border-radius: 6px;
+            font-size: 0.8rem; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+            box-shadow: 0 2px 4px rgba(255, 75, 43, 0.2); transition: transform 0.1s;
+        }
+        .btn-explore:hover { transform: translateY(-1px); box-shadow: 0 4px 6px rgba(255, 75, 43, 0.3); }
+
+        /* Disable editing visuals in sidebar */
+        .add-input:disabled { background: #f7fafc; color: #a0aec0; border-color: #e2e8f0; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div style="display:flex; flex-direction:column;">
+        <a href="index.html" class="brand-hub">Design Research Quality Hub</a>
+        <h2 class="page-title">Design Research Quality Resources</h2>
+    </div>
+
+    <div class="filters-container">
+        <div class="filter-group">
+            <span class="filter-label">Research Class</span>
+            <select id="paradigm-select" class="class-selector" onchange="switchParadigm(this.value)">
+                <option value="qualitative">Qualitative</option>
+                <option value="quantitative">Quantitative</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <span class="filter-label">Research Design Class</span>
+            <select id="design-select" class="class-selector" onchange="switchDesignClass(this.value)">
+                <option value="experimental">Experimental or Quasi-Experimental</option>
+                <option value="non-experimental">Non-Experimental</option>
+            </select>
+        </div>
+    </div>
+
+    <a href="index.html" class="nav-link">&larr; Back to Map</a>
+</header>
+
+<div id="connection-status"></div>
+
+<div id="content-wrapper">
+    <div id="table-container">
+        <table id="matrix-table">
+            <thead>
+            <tr>
+                <th colspan="2" style="background:transparent; border:none;"></th>
+                <th id="data-collection-header" style="text-align:center; background:#edf2f7; color:#2d3748; padding:8px; border:1px solid #e2e8f0; font-weight:800; text-transform:uppercase; letter-spacing:1px;" colspan="1">Data Collection Techniques</th>
+                <th style="background:transparent; border:none;"></th>
+                <th style="background:transparent; border:none;"></th>
+            </tr>
+            <tr id="header-row">
+                <th colspan="2" class="corner-header">
+                    <div style="font-size:0.75rem; color:#718096; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; text-align:center;">Research Designs</div>
+                    <div style="display:flex; gap:10px; font-size:0.7rem; color:#a0aec0; justify-content: space-between;">
+                        <span style="flex-grow:1; text-align:center;">Category</span>
+                        <span style="flex-grow:1; text-align:center;">Sub-category</span>
+                    </div>
+                </th>
+                <!-- Dynamic Cols -->
+            </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+            <tfoot id="table-footer"></tfoot>
+        </table>
+    </div>
+
+    <div id="sidebar">
+        <div class="sidebar-header">
+            <div>
+                <h3 id="sidebar-context" style="margin:0; font-size:1rem; color:#2d3748;">Select a Cell</h3>
+            </div>
+            <span class="close-btn" style="cursor:pointer; font-size:1.2rem;" onclick="closeSidebar()">&times;</span>
+        </div>
+
+        <div class="suitability-panel">
+            <label>Overall Suitability</label>
+            <!-- Disabled to prevent editing -->
+            <select id="cell-suitability" class="add-input" disabled>
+                <option value="">Select...</option>
+                <option value="+">Suitable (+)</option>
+                <option value="-">Limited (-)</option>
+                <option value="o">Not Applicable (o)</option>
+            </select>
+        </div>
+
+        <div class="methods-list-container">
+            <label>Research Methods</label>
+            <p style="font-size:0.75rem; color:#718096; margin-top:0;">Available methods for this intersection.</p>
+            <div id="methods-list"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = "http://localhost:3001";
+    let currentParadigm = 'qualitative';
+    let currentDesignGroup = 'experimental';
+    let matrix = { rows: [], cols: [], data: {} };
+    let activeCell = null;
+    let saveTimeout = null;
+    let isOffline = false;
+
+    async function init() { await fetchMatrix(currentParadigm); }
+
+    async function fetchMatrix(type) {
+        const statusEl = document.getElementById('connection-status');
+        try {
+            const res = await fetch(`${API_URL}/quality/matrix?type=${type}`);
+            if (!res.ok) throw new Error("Server responded with error");
+
+            const json = await res.json();
+
+            // Use seeded data if empty to ensure matrices are complete
+            if (json.rows.length === 0 && json.cols.length === 0) {
+                seedDefaults(type);
+            } else {
+                matrix = migrateData(json);
+            }
+
+            isOffline = false;
+            statusEl.style.display = 'none';
+            renderTable();
+        } catch (e) {
+            console.warn("Server unreachable, switching to Offline mode.", e);
+            isOffline = true;
+            statusEl.className = 'status-offline';
+            statusEl.style.display = 'block';
+            statusEl.innerHTML = '<i class="fas fa-wifi-slash"></i> <strong>Offline Mode:</strong> Viewing static resource maps.';
+
+            seedDefaults(type);
+            renderTable();
+        }
+    }
+
+    function migrateData(json) { return json; }
+
+    function seedDefaults(type) {
+        const isQual = type === 'qualitative';
+
+        // 1. DATA COLLECTION TECHNIQUES (COLUMNS) - Shared across sheets but risks differ
+        const cols = [
+            { id: 'c1', name: 'Observation', risks: isQual ? 'Inter-observer variability. Behavioral distortion.' : 'Inter-observer variability. Behavioral distortion. Limited generalisability.' },
+            { id: 'c2', name: 'Interview', risks: isQual ? 'Time consuming. Interviewer bias.' : 'Quantitative Interviews take a lot of time. Loss of nuance.' },
+            { id: 'c3', name: 'Questionnaire', risks: isQual ? 'Self-selection bias. Low response rates.' : 'Personal interpretation. Selective reporting. Loss of nuance.' },
+            { id: 'c4', name: 'Psychological Test', risks: isQual ? 'Projective tests common.' : 'Projective tests are not used in quantitative research.' },
+            { id: 'c5', name: 'Physiological Measurement', risks: isQual ? 'Hardly imaginable in the field.' : 'Harldly Imaginable in the field. Equipment costs.' },
+            { id: 'c6', name: 'Document Analysis', risks: isQual ? 'Access and authenticity.' : 'No Experimental Data Analysis as it can\'t be manipulated.' }
+        ];
+
+        let rows = [];
+        let data = {};
+
+        const addRow = (id, cat, sub, risks, level1, definition = "") => {
+            rows.push({ id, name: sub, level1, level2: cat, risks, definition });
+        };
+
+        const setCell = (rId, cId, val, methods) => {
+            data[`${rId}_${cId}`] = { suitability: val, methods: methods || [] };
+        };
+
+        // DEFINITIONS (Sheet 3)
+        const defs = {
+            'Fundamental': 'Basic research designed to advance fundamental knowledge about how the world works and build/test theoretical explanations by focusing on the "why" question.',
+            'Applied': 'Research designed to solve specific practical problems or answer certain questions with direct application to the world.',
+            'Exploratory': 'Research conducted for a problem that has not been studied more clearly, intended to establish priorities, develop operational definitions and improve the final research design.',
+            'Descriptive': 'Research used to describe characteristics of a population or phenomenon being studied. It does not answer questions about how/when/why the characteristics occurred.',
+            'Explanatory': 'Research attempting to clarify why and how there is a relationship between two or more aspects of a situation or phenomenon.',
+            'Laboratory': 'Research conducted in a controlled environment where the researcher can manipulate variables.',
+            'Field': 'Research conducted in a natural setting where the researcher observes and records behavior in its natural context.',
+            'Empirical': 'Research based on observed and measured phenomena and derives knowledge from actual experience rather than from theory or belief.',
+            'Methodological': 'Research focusing on the methods used to perform research, including the development and validation of new methods.',
+            'Repeated': 'Research design where the same subjects are measured multiple times under different conditions.',
+            'Non-Repeated': 'Research design where subjects are measured only once.',
+            'Group': 'Research focusing on a collective unit or sample of individuals.',
+            'Case': 'In-depth study of a particular situation rather than a sweeping statistical survey. It is a method used to narrow down a very broad field of research into one easily researchable topic.'
+        };
+
+        if (isQual) {
+            // --- QUALITATIVE ---
+
+            // SHEET 4: QUAL EXPERIMENTAL
+            addRow('r1', 'Fundamentality / Applicability', 'Fundamental', 'Qualitative experimental Designs are rather typical in practice, than in fundamental research.', 'Experimental', defs['Fundamental']);
+            addRow('r2', 'Fundamentality / Applicability', 'Applied', '', 'Experimental', defs['Applied']);
+            addRow('r3', 'Type', 'Empirical', 'Risking non-representative results.', 'Experimental', defs['Empirical']);
+            addRow('r4', 'Type', 'Methodological', '', 'Experimental', defs['Methodological']);
+            addRow('r5', 'Objective', 'Exploratory', 'Experimental explorative qualitative studies aren\'t typical.', 'Experimental', defs['Exploratory']);
+            addRow('r6', 'Objective', 'Descriptive', 'Not aiming for predictive theory development.', 'Experimental', defs['Descriptive']);
+            addRow('r7', 'Objective', 'Explanatory', 'Hypothesis can\'t be tested with qualitative methods.', 'Experimental', defs['Explanatory']);
+            addRow('r8', 'Location', 'Laboratory', 'Example qualitative A/B Testing in Design Research.', 'Experimental', defs['Laboratory']);
+            addRow('r9', 'Location', 'Field Study', 'Experiments in field are quasi-experiments.', 'Experimental', defs['Field']);
+            addRow('r10', 'Measurements', 'Repeated measures', '', 'Experimental', defs['Repeated']);
+            addRow('r11', 'Measurements', 'Non-Repeated measures', '', 'Experimental', defs['Non-Repeated']);
+            addRow('r12', 'Sample', 'Group', '', 'Experimental', defs['Group']);
+            addRow('r13', 'Sample', 'Case study', 'Experiments can\'t have a sample size of n=1.', 'Experimental', defs['Case']);
+
+            ['r1','r2','r3','r4','r5','r6','r8','r9','r10','r11','r12'].forEach(r => cols.forEach(c => setCell(r, c.id, '+')));
+            cols.forEach(c => setCell('r7', c.id, 'o'));
+            cols.forEach(c => setCell('r13', c.id, 'o'));
+            setCell('r13', 'c4', '+', [{id:'m1', name:'Case Studies'}]);
+
+            // SHEET 5: QUAL NON-EXPERIMENTAL (Corrected from Table 5 CSV)
+            addRow('r14', 'Fundamentality / Applicability', 'Fundamental', '', 'Non-Experimental', defs['Fundamental']);
+            addRow('r15', 'Fundamentality / Applicability', 'Applied', '', 'Non-Experimental', defs['Applied']);
+            addRow('r16', 'Type', 'Empirical', '', 'Non-Experimental', defs['Empirical']);
+            addRow('r17', 'Type', 'Methodological', '', 'Non-Experimental', defs['Methodological']);
+            addRow('r18', 'Objective', 'Exploratory', '', 'Non-Experimental', defs['Exploratory']);
+            addRow('r19', 'Objective', 'Descriptive', 'Not aiming for predictive theory development.', 'Non-Experimental', defs['Descriptive']);
+            addRow('r20', 'Objective', 'Explanatory', 'Hypothesis can\'t be tested with qualitative methods.', 'Non-Experimental', defs['Explanatory']);
+            addRow('r21', 'Location', 'Laboratory', '', 'Non-Experimental', defs['Laboratory']);
+            addRow('r22', 'Location', 'Field', '', 'Non-Experimental', defs['Field']);
+            addRow('r23', 'Measurements', 'Repeated measures', '', 'Non-Experimental', defs['Repeated']);
+            addRow('r24', 'Measurements', 'Non-Repeated measures', '', 'Non-Experimental', defs['Non-Repeated']);
+            addRow('r25', 'Sample', 'Group', 'Qualitative Designs allow small sample sizes.', 'Non-Experimental', defs['Group']);
+            addRow('r26', 'Sample', 'Case study', 'Qualitative Designs allow small sample sizes, even n=1.', 'Non-Experimental', defs['Case']);
+
+            // Default Values for Sheet 5 (all + except physio o)
+            ['r14','r15','r16','r17','r18','r19','r21','r22','r24','r25','r26'].forEach(r => cols.forEach(c => setCell(r, c.id, (c.id === 'c5') ? 'o' : '+')));
+            cols.forEach(c => setCell('r20', c.id, 'o')); // Explanatory is 'o'
+
+            // Fix: Table 5 shows Repeated Measures as mainly negative/not applicable
+            cols.forEach(c => setCell('r23', c.id, '-'));
+
+            // Specific methods from Sheet 5
+            setCell('r18', 'c2', '+', [{id:'m2', name:'Qualitative interviews'}, {id:'m3', name:'Personal oral interview'}]);
+            setCell('r21', 'c2', '+', [{id:'m4', name:'Semi structured interview'}, {id:'m5', name:'Narrative interview'}, {id:'m6', name:'Focus Groups'}]);
+            setCell('r22', 'c1', '+', [{id:'m7', name:'Ethnography'}, {id:'m8', name:'Action Research'}, {id:'m9', name:'Participant observation'}]);
+            setCell('r22', 'c2', '+', [{id:'m10', name:'Ethnography'}, {id:'m11', name:'Action Research'}]);
+            // Correct Case Study Mapping (+ for most, o for some)
+            ['c1','c2','c3','c4'].forEach(cid => setCell('r26', cid, '+'));
+            setCell('r26', 'c1', '+', [{id:'m12', name:'Case Studies'}, {id:'m13', name:'Ethnography'}]);
+            setCell('r26', 'c2', '+', [{id:'m14', name:'Case Studies'}]);
+
+        } else {
+            // --- QUANTITATIVE ---
+
+            // SHEET 6: QUANT EXPERIMENTAL
+            addRow('r1', 'Fundamentality / Applicability', 'Fundamental', '', 'Experimental', defs['Fundamental']);
+            addRow('r2', 'Fundamentality / Applicability', 'Applied', '', 'Experimental', defs['Applied']);
+            addRow('r3', 'Type', 'Empirical', '', 'Experimental', defs['Empirical']);
+            addRow('r4', 'Type', 'Methodological', '', 'Experimental', defs['Methodological']);
+            addRow('r5', 'Objective', 'Exploratory', 'Quantitative-Exploratory Designs are very uncommon.', 'Experimental', defs['Exploratory']);
+            addRow('r6', 'Objective', 'Descriptive', 'Experimental designs are not aiming for descriptive results.', 'Experimental', defs['Descriptive']);
+            addRow('r7', 'Objective', 'Explanatory', '', 'Experimental', defs['Explanatory']);
+            addRow('r8', 'Location', 'Laboratory', 'High standard of quantitative research.', 'Experimental', defs['Laboratory']);
+            addRow('r9', 'Location', 'Field', 'Experiments in field are quasi-experiments.', 'Experimental', defs['Field']);
+            addRow('r10', 'Measurements', 'Repeated measures', '', 'Experimental', defs['Repeated']);
+            addRow('r11', 'Measurements', 'Non-Repeated measures', '', 'Experimental', defs['Non-Repeated']);
+            addRow('r12', 'Sample', 'Group', '', 'Experimental', defs['Group']);
+            addRow('r13', 'Sample', 'Case study', 'Quantitative Designs don\'t allow a sample size of n=1.', 'Experimental', defs['Case']);
+
+            ['r1','r2','r3','r4','r7','r8','r9','r10','r11','r12'].forEach(r => cols.forEach(c => setCell(r, c.id, '+')));
+            cols.forEach(c => setCell('r5', c.id, '-'));
+            cols.forEach(c => setCell('r6', c.id, 'o'));
+            cols.forEach(c => setCell('r13', c.id, 'o'));
+            setCell('r1', 'c1', '+', [{id:'m15', name:'Controlled Observation'}]);
+            setCell('r13', 'c6', '+', [{id:'m16', name:'Quantitative Content Analysis'}]);
+
+            // SHEET 7: QUANT NON-EXPERIMENTAL
+            addRow('r14', 'Fundamentality / Applicability', 'Fundamental', '', 'Non-Experimental', defs['Fundamental']);
+            addRow('r15', 'Fundamentality / Applicability', 'Applied', '', 'Non-Experimental', defs['Applied']);
+            addRow('r16', 'Type', 'Empirical', '', 'Non-Experimental', defs['Empirical']);
+            addRow('r17', 'Type', 'Methodological', '', 'Non-Experimental', defs['Methodological']);
+            addRow('r18', 'Objective', 'Exploratory', 'Research is flexible and open-ended.', 'Non-Experimental', defs['Exploratory']);
+            addRow('r19', 'Objective', 'Descriptive', 'Shows what is happening, but not why.', 'Non-Experimental', defs['Descriptive']);
+            addRow('r20', 'Objective', 'Explanatory', '', 'Non-Experimental', defs['Explanatory']);
+            addRow('r21', 'Location', 'Laboratory', 'Uncommon for non-experimental research.', 'Non-Experimental', defs['Laboratory']);
+            addRow('r22', 'Location', 'Field', '', 'Non-Experimental', defs['Field']);
+            addRow('r23', 'Measurements', 'Repeated measures', '', 'Non-Experimental', defs['Repeated']);
+            addRow('r24', 'Measurements', 'Non-Repeated measures', '', 'Non-Experimental', defs['Non-Repeated']);
+            addRow('r25', 'Sample', 'Group', '', 'Non-Experimental', defs['Group']);
+            addRow('r26', 'Sample', 'Case study', 'Quantitative Designs don\'t allow a sample size of n=1.', 'Non-Experimental', defs['Case']);
+
+            ['r14','r15','r16','r17','r18','r19','r20','r22','r23','r24','r25'].forEach(r => cols.forEach(c => setCell(r, c.id, '+')));
+            cols.forEach(c => setCell('r21', c.id, 'o'));
+            cols.forEach(c => setCell('r26', c.id, 'o'));
+
+            setCell('r19', 'c1', '+', [{id:'m17', name:'Participant Observation'}]);
+            setCell('r19', 'c2', '+', [{id:'m18', name:'Personal oral interview'}, {id:'m19', name:'Structured interview'}]);
+            setCell('r19', 'c6', '+', [{id:'m20', name:'Quantitative Content Analysis'}]);
+            setCell('r20', 'c6', '+', [{id:'m21', name:'Quantitative Content Analysis'}]);
+            setCell('r26', 'c6', '+', [{id:'m22', name:'Quantitative Content Analysis'}]);
+        }
+
+        matrix = { rows, cols, data };
+        return matrix;
+    }
+
+    function switchParadigm(val) { currentParadigm = val; fetchMatrix(val); }
+    function switchDesignClass(val) { currentDesignGroup = val; renderTable(); }
+
+    function renderTable() {
+        const headerRow = document.getElementById('header-row');
+        const tbody = document.getElementById('table-body');
+        const tfoot = document.getElementById('table-footer');
+        const superHeader = document.getElementById('data-collection-header');
+
+        if(superHeader) superHeader.colSpan = matrix.cols.length + 1;
+
+        // HEADERS
+        while (headerRow.children.length > 1) headerRow.removeChild(headerRow.lastChild);
+        matrix.cols.forEach(col => {
+            const th = document.createElement('th');
+            th.className = 'method-col';
+            th.innerHTML = `<div class="static-text" style="text-align:center; font-size:0.9rem;">${col.name}</div>`;
+            headerRow.appendChild(th);
+        });
+
+        const spacerTh = document.createElement('th');
+        spacerTh.style.background = "#fff";
+        headerRow.appendChild(spacerTh);
+
+        const riskColTh = document.createElement('th');
+        riskColTh.style.backgroundColor = 'var(--risk-bg)';
+        riskColTh.style.color = 'var(--risk-text)';
+        riskColTh.innerText = "Research Design Risks";
+        headerRow.appendChild(riskColTh);
+
+        // ROWS
+        tbody.innerHTML = '';
+        const filteredRows = matrix.rows.filter(r => {
+            if (currentDesignGroup === 'experimental') return r.level1 === 'Experimental' || r.level1 === 'Quasi-Experimental';
+            return r.level1 === 'Non-Experimental';
+        });
+
+        const groups = {};
+        filteredRows.forEach(r => {
+            const spec = r.level2 || "Unspecified";
+            if(!groups[spec]) groups[spec] = [];
+            groups[spec].push(r);
+        });
+
+        for (const [specifics, rows] of Object.entries(groups)) {
+            rows.forEach((row, index) => {
+                const tr = document.createElement('tr');
+
+                // Category
+                if (index === 0) {
+                    const td1 = document.createElement('td');
+                    td1.className = 'sticky-col-1';
+                    td1.rowSpan = rows.length;
+                    td1.innerHTML = `<div class="static-text" style="font-weight:700; padding-top:20px;">${specifics}</div>`;
+                    tr.appendChild(td1);
+                }
+
+                // Sub-category with visual clue
+                const td2 = document.createElement('td');
+                td2.className = 'sticky-col-2';
+                const tooltipAttr = row.definition ? `title="${row.definition}"` : '';
+                const visualClass = row.definition ? 'definition-tooltip' : '';
+                td2.innerHTML = `<div class="static-text ${visualClass}" ${tooltipAttr}>${row.name}</div>`;
+                tr.appendChild(td2);
+
+                // Cells
+                matrix.cols.forEach(col => {
+                    const td = document.createElement('td');
+                    td.className = 'data-cell';
+                    const key = `${row.id}_${col.id}`;
+                    const cellData = matrix.data[key] || { methods: [], suitability: "" };
+                    td.setAttribute('data-suitability', cellData.suitability);
+
+                    let html = '';
+                    if (cellData.methods && cellData.methods.length > 0) {
+                        cellData.methods.forEach(m => {
+                            const safeName = m.name ? m.name.replace(/'/g, "\\'") : '';
+                            html += `
+                                <div class="method-block">
+                                    ${m.name}<i class="fas fa-external-link-alt method-link-icon" onclick="openMethodResources(event, '${m.id}', '${safeName}')"></i>
+                                </div>
+                            `;
+                        });
+                        td.innerHTML = html;
+                    }
+                    td.onclick = () => openSidebar(row, col, key);
+                    tr.appendChild(td);
+                });
+
+                // Spacer for where "Add Col" was
+                tr.appendChild(document.createElement('td'));
+
+                // Risks
+                const tdRisk = document.createElement('td');
+                tdRisk.innerHTML = `<div class="static-risk">${row.risks || '-'}</div>`;
+                tr.appendChild(tdRisk);
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        // FOOTER
+        tfoot.innerHTML = '';
+        const riskRow = document.createElement('tr');
+
+        const riskHeaderTd = document.createElement('td');
+        riskHeaderTd.colSpan = 2;
+        riskHeaderTd.className = 'sticky-col-1';
+        riskHeaderTd.style.textAlign = "right";
+        riskHeaderTd.style.fontWeight = "bold";
+        riskHeaderTd.style.paddingRight = "15px";
+        riskHeaderTd.style.verticalAlign = "middle";
+        riskHeaderTd.innerText = "Data Collection Risks";
+        riskRow.appendChild(riskHeaderTd);
+
+        matrix.cols.forEach(col => {
+            const td = document.createElement('td');
+            td.style.backgroundColor = '#fff9f9';
+            td.style.borderTop = '2px solid #cbd5e0';
+            td.style.verticalAlign = 'top';
+            td.innerHTML = `<div class="static-risk">${col.risks || '-'}</div>`;
+            riskRow.appendChild(td);
+        });
+
+        const filler1 = document.createElement('td'); filler1.style.backgroundColor='#fff9f9'; filler1.style.borderTop='2px solid #cbd5e0';
+        const filler2 = document.createElement('td'); filler2.style.backgroundColor='#fff9f9'; filler2.style.borderTop='2px solid #cbd5e0';
+        riskRow.appendChild(filler1);
+        riskRow.appendChild(filler2);
+
+        tfoot.appendChild(riskRow);
+    }
+
+    // Read only - empty functions
+    async function addNewMethodToCell() {}
+    function updateMethodName(index, val) {}
+    function deleteMethod(index) {}
+    function addNewSpecifics() {}
+    function addNewCol() {}
+    function deleteCol(id) {}
+    function updateCol(id, f, v) {}
+    function addNewType(spec) {}
+    function deleteRow(id) {}
+    function deleteCategory(spec) {}
+    function updateRow(id, f, v) {}
+    function updateSpecificsName(oldV, newV) {}
+    function triggerSave() {}
+    async function saveMatrix() {}
+
+    function openSidebar(row, col, key) {
+        activeCell = key;
+        const sidebar = document.getElementById('sidebar'); sidebar.classList.add('open');
+        document.getElementById('table-container').style.marginRight = "400px";
+        document.getElementById('sidebar-context').innerHTML = `${col.name}<br><span style="font-weight:400; font-size:0.8em; color:#718096;">in ${row.name}</span>`;
+        if(!matrix.data[key]) matrix.data[key] = { methods: [], suitability: "" };
+        document.getElementById('cell-suitability').value = matrix.data[key].suitability || "";
+        renderMethodsList();
+    }
+
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('table-container').style.marginRight = "0";
+        activeCell = null;
+    }
+
+    function updateCellSuitability(val) { }
+
+    function renderMethodsList() {
+        const listContainer = document.getElementById('methods-list'); listContainer.innerHTML = '';
+        const cellData = matrix.data[activeCell];
+        if (cellData.methods.length === 0) { listContainer.innerHTML = '<div style="font-size:0.8rem; color:#cbd5e0; font-style:italic;">No methods defined yet.</div>'; return; }
+
+        cellData.methods.forEach((method, index) => {
+            const item = document.createElement('div'); item.className = 'method-item';
+
+            const params = new URLSearchParams({ id: method.id, name: method.name });
+            const exploreUrl = `method_resources.html?${params.toString()}`;
+
+            item.innerHTML = `
+                <div class="method-item-header">
+                    <span style="font-weight:600; font-size:0.95rem;">${method.name}</span>
+                </div>
+                <div style="display:flex; justify-content:flex-end;">
+                     <a href="${exploreUrl}" target="_blank" class="btn-explore">
+                        <i class="fas fa-book-open"></i> Explore Resources
+                    </a>
+                </div>
+            `;
+            listContainer.appendChild(item);
+        });
+    }
+
+    function openMethodResources(event, id, name) {
+        event.stopPropagation();
+        const params = new URLSearchParams({ id: id, name: name });
+        window.open(`method_resources.html?${params.toString()}`, '_blank');
+    }
+
+    window.onload = init;
+</script>
+</body>
+</html>
