@@ -176,13 +176,26 @@
     </div>
     <button class="btn-primary" id="add-btn" onclick="addRelationship()" style="height: 38px; margin-bottom: 2px;" disabled>Add Evidence</button>
 
+    <!-- LEVEL FILTER -->
     <div class="filter-section">
-        <label style="margin:0; font-size:0.7rem;">Filter Visibility</label>
+        <label style="margin:0; font-size:0.7rem;">Filter Level</label>
         <div class="filter-group">
-            <label class="filter-option"><input type="checkbox" class="filter-cb" value="experiment" checked onchange="applyFilters()"><span style="color:#48BB78; font-weight:800;">●</span> Exp</label>
-            <label class="filter-option"><input type="checkbox" class="filter-cb" value="observation" checked onchange="applyFilters()"><span style="color:#ECC94B; font-weight:800;">●</span> Obs</label>
-            <label class="filter-option"><input type="checkbox" class="filter-cb" value="expert opinion" checked onchange="applyFilters()"><span style="color:#F56565; font-weight:800;">●</span> Ops</label>
-            <label class="filter-option"><input type="checkbox" class="filter-cb" value="assumption" checked onchange="applyFilters()"><span style="color:#A0AEC0; font-weight:800;">--</span> Assump</label>
+            <label class="filter-option"><input type="checkbox" class="filter-level" value="experiment" checked onchange="applyFilters()"><span style="color:#48BB78; font-weight:800;">●</span> Exp</label>
+            <label class="filter-option"><input type="checkbox" class="filter-level" value="observation" checked onchange="applyFilters()"><span style="color:#ECC94B; font-weight:800;">●</span> Obs</label>
+            <label class="filter-option"><input type="checkbox" class="filter-level" value="expert opinion" checked onchange="applyFilters()"><span style="color:#F56565; font-weight:800;">●</span> Ops</label>
+            <label class="filter-option"><input type="checkbox" class="filter-level" value="assumption" checked onchange="applyFilters()"><span style="color:#A0AEC0; font-weight:800;">--</span> Assump</label>
+        </div>
+    </div>
+
+    <!-- CAUSALITY FILTER -->
+    <div class="filter-section">
+        <label style="margin:0; font-size:0.7rem;">Filter Causality</label>
+        <div class="filter-group">
+            <label class="filter-option"><input type="checkbox" class="filter-causality" value="++" checked onchange="applyFilters()"> ++</label>
+            <label class="filter-option"><input type="checkbox" class="filter-causality" value="--" checked onchange="applyFilters()"> --</label>
+            <label class="filter-option"><input type="checkbox" class="filter-causality" value="+-" checked onchange="applyFilters()"> +-</label>
+            <label class="filter-option"><input type="checkbox" class="filter-causality" value="-+" checked onchange="applyFilters()"> -+</label>
+            <label class="filter-option"><input type="checkbox" class="filter-causality" value="" checked onchange="applyFilters()"> None</label>
         </div>
     </div>
 </div>
@@ -289,11 +302,21 @@
 
     // --- LOGIC ---
     function applyFilters() {
-        const activeFilters = Array.from(document.querySelectorAll('.filter-cb')).filter(cb => cb.checked).map(cb => cb.value);
+        // Collect active values from both filter sets
+        const activeLevels = Array.from(document.querySelectorAll('.filter-level')).filter(cb => cb.checked).map(cb => cb.value);
+        const activeCausality = Array.from(document.querySelectorAll('.filter-causality')).filter(cb => cb.checked).map(cb => cb.value);
+
         cy.batch(() => {
             cy.edges().forEach(edge => {
-                if (activeFilters.includes(edge.data('level'))) edge.removeClass('filtered-hidden');
-                else edge.addClass('filtered-hidden');
+                const level = edge.data('level');
+                const causality = edge.data('causality') || "";
+
+                // Edge is shown only if it passes BOTH filters
+                if (activeLevels.includes(level) && activeCausality.includes(causality)) {
+                    edge.removeClass('filtered-hidden');
+                } else {
+                    edge.addClass('filtered-hidden');
+                }
             });
         });
     }
@@ -303,6 +326,8 @@
         const map = {"":"++", "++":"+-", "+-":"-+", "-+":"--", "--":""};
         edge.data('causality', map[edge.data('causality')||""] || "");
         await saveEdgeData(edge);
+        // Re-apply filters because changing causality might hide it if that type is filtered out
+        applyFilters();
     });
 
     async function saveEdgeData(edge) {
@@ -377,6 +402,8 @@
 
     function exportSVG() {
         if (!currentMap) return alert("No map loaded.");
+        if (typeof cy.svg !== 'function') return alert("SVG export not supported by this library version.");
+
         let filename = prompt("Filename:", currentMap.replace(/\s+/g, '_') + "_graph");
         if (!filename) return;
         if (!filename.endsWith(".svg")) filename += ".svg";

@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Method Resources Explorer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%);
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-main: #2d3748;
+            --text-light: #718096;
+            --tag-lang: #E9D8FD; --tag-lang-text: #553C9A;
+            --tag-area: #C6F6D5; --tag-area-text: #22543D;
+        }
+
+        html, body {
+            height: 100%; margin: 0; padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--card-bg); padding: 15px 30px;
+            border-bottom: 1px solid #e2e8f0; flex-shrink: 0;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+        .method-title-box h1 { margin: 0; font-size: 1.5rem; font-weight: 800; background: var(--secondary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .subtitle { font-size: 0.9rem; color: var(--text-light); }
+
+        /* Close Link Style */
+        .back-link {
+            text-decoration: none; font-weight: 600; color: #718096;
+            padding: 8px 16px; border-radius: 20px; transition: 0.2s;
+            cursor: pointer; display: flex; align-items: center; gap: 5px;
+        }
+        .back-link:hover { background-color: #edf2f7; color: #2d3748; }
+
+        /* Main Layout */
+        #main-container { display: flex; height: 100%; }
+
+        /* Sidebar Filters */
+        #filter-sidebar {
+            width: 300px;
+            background: #ffffff;
+            border-right: 1px solid #f0f0f0;
+            padding: 35px 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            box-shadow: 4px 0 24px rgba(0,0,0,0.02);
+            z-index: 10;
+        }
+
+        .filter-section h4 {
+            margin: 0 0 12px 0;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #a0aec0;
+            letter-spacing: 1.2px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        /* Modern Filter Pills */
+        .checkbox-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            user-select: none;
+            padding: 8px 16px;
+            background-color: #f7fafc;
+            border: 1px solid #edf2f7;
+            border-radius: 24px;
+            color: #718096;
+            font-weight: 600;
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .checkbox-label:hover {
+            background-color: #edf2f7;
+            color: #4a5568;
+            border-color: #cbd5e0;
+            transform: translateY(-1px);
+        }
+
+        .checkbox-label input { display: none; }
+
+        /* Active State styling */
+        .checkbox-label.active,
+        .checkbox-label:has(input:checked) {
+            background-color: #2d3748;
+            color: #ffffff;
+            border-color: #2d3748;
+            box-shadow: 0 4px 10px rgba(45, 55, 72, 0.3);
+            transform: translateY(-1px);
+        }
+
+        /* Content Area */
+        #resource-content { flex-grow: 1; padding: 30px; overflow-y: auto; background: var(--bg-color); }
+
+        /* Action Bar */
+        .action-bar { display: flex; gap: 15px; margin-bottom: 25px; }
+        .btn-primary { background: var(--primary-gradient); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3); transition: transform 0.1s; }
+        .btn-primary:hover { transform: translateY(-2px); }
+        .btn-secondary { background: white; color: #2d3748; border: 1px solid #cbd5e0; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+        .btn-secondary:hover { background: #f7fafc; }
+
+        /* Resource Grid */
+        .resource-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(600px, 1fr)); gap: 20px; }
+
+        .resource-card {
+            background: #fff; border-radius: 12px; padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid transparent;
+            transition: all 0.2s; position: relative;
+        }
+        .resource-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px rgba(0,0,0,0.08); border-color: #e2e8f0; }
+
+        .card-type { position: absolute; top: 20px; right: 20px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; padding: 4px 8px; border-radius: 4px; }
+        .type-paper { background: #EBF8FF; color: #2B6CB0; }
+        .type-guideline { background: #FAF5FF; color: #553C9A; }
+        .type-standard { background: #F0FFF4; color: #276749; }
+
+        .res-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 5px; padding-right: 80px; color: #2d3748; }
+        .res-meta { font-size: 0.85rem; color: #718096; margin-bottom: 12px; }
+        .res-desc { font-size: 0.9rem; color: #4a5568; line-height: 1.6; margin-bottom: 15px; background: #fafafa; padding: 10px; border-radius: 6px; }
+
+        .tag-container { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+        .tag { font-size: 0.75rem; padding: 4px 10px; border-radius: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
+        .tag-lang { background: var(--tag-lang); color: var(--tag-lang-text); }
+        .tag-area { background: var(--tag-area); color: var(--tag-area-text); }
+        .tag i { font-size: 0.7rem; opacity: 0.5; cursor: pointer; }
+        .tag i:hover { opacity: 1; }
+
+        .add-tag-btn { background: #edf2f7; border: none; border-radius: 12px; padding: 4px 10px; font-size: 0.75rem; cursor: pointer; color: #4a5568; }
+        .add-tag-btn:hover { background: #cbd5e0; }
+
+        /* Standard Specifics */
+        .standard-checklist { margin-top: 10px; border-top: 1px solid #edf2f7; padding-top: 10px; }
+        .check-item { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 4px 0; border-bottom: 1px dashed #edf2f7; }
+        .check-label { font-weight: 600; color: #4a5568; }
+        .check-type { font-size: 0.7rem; text-transform: uppercase; font-weight: 700; }
+        .check-essential { color: #e53e3e; }
+        .check-desirable { color: #38a169; }
+
+        /* Modal */
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+        .modal-content { background-color: #fefefe; padding: 30px; border-radius: 12px; width: 650px; max-width: 90%; position: relative; max-height: 90vh; overflow-y: auto; }
+        .close { position: absolute; right: 20px; top: 15px; font-size: 28px; font-weight: bold; color: #aaa; cursor: pointer; }
+        .close:hover { color: black; }
+
+        input, select, textarea { width: 100%; padding: 10px; margin: 5px 0 15px 0; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; font-family: 'Poppins'; }
+
+        /* Modal Tags */
+        .modal-tag-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+        .modal-tag {
+            display: inline-block; padding: 8px 16px; background-color: #f7fafc;
+            border: 1px solid #edf2f7; border-radius: 24px; color: #718096;
+            font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; user-select: none;
+        }
+        .modal-tag:hover { background-color: #edf2f7; color: #4a5568; border-color: #cbd5e0; }
+        .modal-tag.selected { background-color: #2d3748; color: #ffffff; border-color: #2d3748; box-shadow: 0 2px 5px rgba(45, 55, 72, 0.3); transform: translateY(-1px); }
+
+        /* Standard Document Style - REFINED */
+        .std-doc { font-family: 'Georgia', serif; line-height: 1.6; color: #333; }
+        .std-doc h2 { border-bottom: 2px solid #667eea; padding-bottom: 10px; margin-bottom: 20px; color: #2d3748; font-family: 'Poppins', sans-serif; font-size: 1.8rem; }
+        .std-doc h3 { color: #667eea; margin-top: 30px; margin-bottom: 15px; font-family: 'Poppins', sans-serif; font-size: 1.2rem; font-weight: 600; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; }
+        .std-doc p { margin-bottom: 15px; font-size: 1rem; }
+        .std-quote {
+            font-style: italic; background: #f8fafc; padding: 20px;
+            border-left: 4px solid #667eea; margin: 25px 0;
+            border-radius: 4px; color: #4a5568;
+            font-size: 1.05rem;
+        }
+        .std-list { list-style-type: none; padding: 0; margin-bottom: 20px; }
+        .std-list li {
+            margin-bottom: 12px; padding-left: 25px; position: relative;
+            font-size: 0.95rem; display: flex; align-items: flex-start;
+        }
+        .std-list li::before {
+            content: "•"; color: #667eea; font-weight: bold;
+            position: absolute; left: 5px; font-size: 1.2em; top: -3px;
+        }
+
+        .std-badge {
+            display: inline-block; padding: 4px 10px; border-radius: 12px;
+            font-size: 0.7rem; font-weight: 700; font-family: 'Poppins', sans-serif;
+            text-transform: uppercase; margin-left: 10px; white-space: nowrap; flex-shrink: 0;
+            vertical-align: middle;
+        }
+        .badge-essential { background: #fee2e2; color: #c53030; border: 1px solid #feb2b2; }
+        .badge-desirable { background: #d1fae5; color: #2f855a; border: 1px solid #9ae6b4; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="method-title-box">
+        <div class="subtitle">Exploring Resources for:</div>
+        <h1 id="method-name-display">Loading...</h1>
+    </div>
+    <!-- Updated Back Button to "Close" -->
+    <a href="#" onclick="window.close(); return false;" class="back-link">
+        <i class="fas fa-times"></i> Close
+    </a>
+</header>
+
+<div id="connection-status"></div>
+
+<div id="main-container">
+    <div id="filter-sidebar">
+        <div class="filter-section">
+            <h4>Resource Type</h4>
+            <div class="checkbox-group">
+                <label class="checkbox-label active"><input type="checkbox" class="filter-type" value="methodological guidelines" checked> Guidelines</label>
+                <label class="checkbox-label active"><input type="checkbox" class="filter-type" value="exemplary papers" checked> Exemplary Papers</label>
+                <label class="checkbox-label active"><input type="checkbox" class="filter-type" value="empirical standards" checked> Empirical Standards</label>
+            </div>
+        </div>
+
+        <div class="filter-section">
+            <h4>Language</h4>
+            <div class="checkbox-group">
+                <label class="checkbox-label active"><input type="checkbox" class="filter-tag" value="english" checked> English</label>
+                <label class="checkbox-label"><input type="checkbox" class="filter-tag" value="french"> French</label>
+                <label class="checkbox-label"><input type="checkbox" class="filter-tag" value="spanish"> Spanish</label>
+                <label class="checkbox-label"><input type="checkbox" class="filter-tag" value="portuguese"> Portuguese</label>
+            </div>
+        </div>
+
+        <div class="filter-section">
+            <h4>Design Area</h4>
+            <div class="checkbox-group">
+                <label class="checkbox-label active"><input type="checkbox" class="filter-tag" value="architecture design" checked> Architecture</label>
+                <label class="checkbox-label active"><input type="checkbox" class="filter-tag" value="product design" checked> Product</label>
+                <label class="checkbox-label"><input type="checkbox" class="filter-tag" value="human-computer interaction design"> HCI</label>
+                <label class="checkbox-label"><input type="checkbox" class="filter-tag" value="software design"> Software</label>
+                <!-- Added Marketing -->
+                <label class="checkbox-label"><input type="checkbox" class="filter-tag" value="marketing"> Marketing</label>
+            </div>
+        </div>
+    </div>
+
+    <div id="resource-content">
+        <div class="action-bar">
+            <!-- Dynamic ID added for updating text -->
+            <button id="btn-add-resource" class="btn-primary" onclick="openAddModal('paper')"><i class="fas fa-plus"></i> Add Paper/Guideline</button>
+            <button id="btn-visualize-standards" class="btn-secondary" onclick="openStandardsModal()">
+                <i class="fas fa-file-contract" style="margin-right:8px;"></i> Visualize Empirical Standards
+            </button>
+        </div>
+
+        <div id="resources-grid" class="resource-grid">
+            <!-- Dynamic Content -->
+        </div>
+    </div>
+</div>
+
+<!-- ADD MODAL -->
+<div id="add-modal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('add-modal')">&times;</span>
+        <h3 id="modal-title">Add Resource</h3>
+
+        <!-- Standard Form (Hidden) -->
+        <div id="standard-form" style="display:none;"></div>
+
+        <!-- DOI/ISBN Form -->
+        <div id="doi-form">
+            <label>Category</label>
+            <select id="res-category">
+                <option value="exemplary papers">Exemplary Paper</option>
+                <option value="methodological guidelines">Methodological Guideline</option>
+            </select>
+            <!-- Updated Label -->
+            <label>DOI or ISBN</label>
+            <input id="res-doi" placeholder="e.g. 10.1145/xxxx or 978-3-16-148410-0">
+
+            <label style="margin-top:15px;">Language</label>
+            <div class="modal-tag-group" id="lang-tags-container">
+                <span class="modal-tag" data-type="lang" data-val="english" onclick="toggleTag(this)">English</span>
+                <span class="modal-tag" data-type="lang" data-val="french" onclick="toggleTag(this)">French</span>
+                <span class="modal-tag" data-type="lang" data-val="spanish" onclick="toggleTag(this)">Spanish</span>
+                <span class="modal-tag" data-type="lang" data-val="portuguese" onclick="toggleTag(this)">Portuguese</span>
+            </div>
+
+            <label>Design Area</label>
+            <div class="modal-tag-group" id="area-tags-container">
+                <span class="modal-tag" data-type="area" data-val="architecture design" onclick="toggleTag(this)">Architecture</span>
+                <span class="modal-tag" data-type="area" data-val="product design" onclick="toggleTag(this)">Product Design</span>
+                <span class="modal-tag" data-type="area" data-val="human-computer interaction design" onclick="toggleTag(this)">HCI Design</span>
+                <span class="modal-tag" data-type="area" data-val="software design" onclick="toggleTag(this)">Software Design</span>
+                <span class="modal-tag" data-type="area" data-val="marketing" onclick="toggleTag(this)">Marketing</span>
+            </div>
+        </div>
+
+        <button class="btn-primary" onclick="submitResource()" style="width:100%; margin-top:20px;">Add to Library</button>
+    </div>
+</div>
+
+<!-- STANDARDS MODAL -->
+<div id="standards-modal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('standards-modal')">&times;</span>
+        <div id="standards-content" class="std-doc">
+            <!-- Content Injected Here -->
+        </div>
+    </div>
+</div>
+
+<!-- TAG MODAL -->
+<div id="tag-modal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('tag-modal')">&times;</span>
+        <h3>Manage Tags</h3>
+        <input type="hidden" id="tag-resource-id">
+        <label>Language</label>
+        <select id="tag-lang">
+            <option value="">Select...</option>
+            <option value="english">English</option>
+            <option value="french">French</option>
+            <option value="spanish">Spanish</option>
+            <option value="portuguese">Portuguese</option>
+        </select>
+        <button class="btn-secondary" onclick="addTag('language')" style="margin-bottom:15px;">Add Language Tag</button>
+        <label>Design Area</label>
+        <select id="tag-area">
+            <option value="">Select...</option>
+            <option value="architecture design">Architecture Design</option>
+            <option value="product design">Product Design</option>
+            <option value="human-computer interaction design">HCI Design</option>
+            <option value="software design">Software Design</option>
+            <option value="marketing">Marketing</option>
+        </select>
+        <button class="btn-secondary" onclick="addTag('design area')">Add Area Tag</button>
+    </div>
+</div>
+
+<script>
+    const API_URL = "http://localhost:3001";
+    const urlParams = new URLSearchParams(window.location.search);
+    const methodId = urlParams.get('id');
+    const methodName = urlParams.get('name');
+    let isOffline = false;
+
+    document.getElementById('method-name-display').innerText = methodName || "Unknown Method";
+
+    if (methodName) {
+        document.getElementById('btn-add-resource').innerHTML = `<i class="fas fa-plus"></i> Add ${methodName} resources`;
+    }
+
+    // --- Standards Content Data (Complete Case Study Standard) ---
+    const caseStudyStandard = `
+        <h2>Case Study and Ethnography</h2>
+        <div class="std-quote">"An empirical inquiry that investigates a contemporary phenomenon (the 'case') in depth and within its real-world context, especially when the boundaries between phenomenon and context are unclear" (Yin 2017)</div>
+
+        <h3>Application</h3>
+        <p>This standard applies to empirical research that meets the following conditions:</p>
+        <ul class="std-list">
+            <li>Presents a detailed account of a specific instance of a phenomenon at a site. The phenomenon can be virtually anything of interest (e.g. Unix, cohesion metrics, communication issues). The site can be a community, an organization, a team, a person, a process, an internet platform, etc.</li>
+            <li>Features direct or indirect observation (e.g. interviews, focus groups)-see Lethbridge et al.'s (2005) taxonomy.</li>
+            <li>Is not an experience report (cf. Perry et al. 2004) or a series of shallow inquiries at many different sites.</li>
+        </ul>
+        <p>A case study can be brief (e.g. a week of observation) or longitudinal (if observation exceeds the natural rhythm of the site; e.g., observing a product over many releases). For our purposes, case study subsumes ethnography.</p>
+        <p>If data collection and analysis are interleaved, consider the Grounded Theory Standard. If the study mentions action research, or intervenes in the context, consider the Action Research Standard. If the study captures a large quantitative dataset with limited context, consider the Data Science Standard.</p>
+
+        <h3>Specific Attributes - Essential</h3>
+        <ul class="std-list">
+            <li>Justifies the selection of the case(s) or site(s) <span class="std-badge badge-essential">Essential</span></li>
+            <li>Provides a rich description of the context (e.g. location, time, demographics, tools) <span class="std-badge badge-essential">Essential</span></li>
+            <li>Collects data from multiple sources (triangulation) or multiple perspectives <span class="std-badge badge-essential">Essential</span></li>
+            <li>Describes the data analysis method (e.g. coding, thematic analysis) <span class="std-badge badge-essential">Essential</span></li>
+            <li>Chain of evidence: Clear link between data and conclusions <span class="std-badge badge-essential">Essential</span></li>
+        </ul>
+
+        <h3>Specific Attributes - Desirable</h3>
+        <ul class="std-list">
+            <li>Reflects on the researcher's role and potential bias <span class="std-badge badge-desirable">Desirable</span></li>
+            <li>Uses member checking (participants review findings) <span class="std-badge badge-desirable">Desirable</span></li>
+            <li>Discusses transferability (applicability to other contexts) <span class="std-badge badge-desirable">Desirable</span></li>
+        </ul>
+    `;
+
+    function openStandardsModal() {
+        const modal = document.getElementById('standards-modal');
+        const content = document.getElementById('standards-content');
+
+        if (methodName && (methodName.toLowerCase().includes('case') || methodName.toLowerCase().includes('ethno'))) {
+            content.innerHTML = caseStudyStandard;
+        } else {
+            content.innerHTML = `
+                <h2>Empirical Standard</h2>
+                <p>Specific standard content for <strong>${methodName}</strong> is currently being curated.</p>
+                <div class="std-quote">
+                    Please refer to <a href="https://www2.sigsoft.org/EmpiricalStandards/docs/" target="_blank" style="color:#667eea; font-weight:bold;">SIGSOFT Empirical Standards</a> for the full list of definitions and attributes.
+                </div>
+            `;
+        }
+
+        modal.style.display = 'flex';
+    }
+
+    // Initialize Filters behavior
+    document.querySelectorAll('.filter-type, .filter-tag').forEach(input => {
+        // Init visual state
+        if(input.checked) input.parentElement.classList.add('active');
+
+        // Add change listener
+        input.addEventListener('change', function() {
+            this.parentElement.classList.toggle('active', this.checked);
+            fetchResources();
+        });
+    });
+
+    let currentMode = 'paper';
+
+    async function fetchResources() {
+        const types = Array.from(document.querySelectorAll('.filter-type:checked')).map(cb => cb.value);
+        const tags = Array.from(document.querySelectorAll('.filter-tag:checked')).map(cb => cb.value);
+        const statusEl = document.getElementById('connection-status');
+
+        try {
+            const res = await fetch(`${API_URL}/method/${methodId}/resources`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ types, tags })
+            });
+
+            if (!res.ok) throw new Error("Server connection failed");
+
+            const data = await res.json();
+            isOffline = false;
+            if(statusEl) statusEl.style.display = 'none';
+
+            // INJECT "EMPIRICAL STANDARD" CARD IF SELECTED IN FILTERS
+            // This ensures the standard is visible as a resource card if filter is active
+            if (types.includes('empirical standards') && methodName &&
+                (methodName.toLowerCase().includes('case') || methodName.toLowerCase().includes('ethno'))) {
+                const standardResource = {
+                    id: 'std-case-study',
+                    type: 'empirical standards',
+                    title: 'Case Study and Ethnography Standard',
+                    author: 'SIGSOFT Empirical Standards',
+                    year: '2021',
+                    abstract: 'Defines essential and desirable attributes for Case Study and Ethnography research.',
+                    tags: []
+                };
+                // Prepend to show at top
+                data.unshift(standardResource);
+            }
+
+            renderResources(data);
+        } catch(e) {
+            console.warn("Error loading resources, switching to offline mode", e);
+            isOffline = true;
+            if(statusEl) {
+                statusEl.className = 'status-offline';
+                statusEl.style.display = 'block';
+                statusEl.innerHTML = '<i class="fas fa-wifi-slash"></i> <strong>Offline Mode:</strong> Server unreachable. Showing sample resources.';
+            }
+            renderResources(getDemoResources());
+        }
+    }
+
+    function getDemoResources() {
+        return [
+            {
+                id: 'd1', type: 'methodological guidelines', title: 'Conducting Effective User Interviews',
+                author: 'Norman, D.', year: '2013', doi: '10.1016/j.destech.2013.01.001',
+                tags: ['english', 'product design']
+            },
+            {
+                id: 'd2', type: 'exemplary papers', title: 'Ethnography in Software Design',
+                author: 'Smith, J.', year: '2019', doi: '10.1145/3290605.3300231',
+                abstract: 'A deep dive into how ethnographic methods inform software requirements.',
+                tags: ['english', 'software design']
+            }
+        ];
+    }
+
+    function renderResources(resources) {
+        const grid = document.getElementById('resources-grid');
+        grid.innerHTML = '';
+
+        if(resources.length === 0) {
+            grid.innerHTML = '<div style="color:#a0aec0; grid-column:1/-1; text-align:center; padding:40px;">No resources found matching filters.</div>';
+            return;
+        }
+
+        resources.forEach(res => {
+            const card = document.createElement('div');
+            card.className = 'resource-card';
+
+            let typeClass = 'type-paper';
+            if(res.type === 'methodological guidelines') typeClass = 'type-guideline';
+            if(res.type === 'empirical standards') typeClass = 'type-standard';
+
+            let contentHtml = '';
+
+            // Render content based on type
+            if(res.type === 'empirical standards') {
+                contentHtml = `<div class="res-desc">
+                    ${res.abstract || 'Standard definition.'}
+                    <div style="margin-top:10px;">
+                        <button onclick="openStandardsModal()" class="btn-secondary" style="font-size:0.75rem; padding:5px 10px;">
+                            <i class="fas fa-eye"></i> View Details
+                        </button>
+                    </div>
+                </div>`;
+            } else {
+                contentHtml = `<div class="res-desc">${res.abstract || 'No abstract available.'}</div>`;
+            }
+
+            const tagsHtml = (res.tags || []).map(t => {
+                const styleClass = ['english','french','spanish','portuguese'].includes(t.toLowerCase()) ? 'tag-lang' : 'tag-area';
+                return `<span class="tag ${styleClass}">${t} <i class="fas fa-times" onclick="removeTag('${res.id}', '${t}')"></i></span>`;
+            }).join('');
+
+            card.innerHTML = `
+                <span class="card-type ${typeClass}">${res.type}</span>
+                <div class="res-title">${res.title}</div>
+                <div class="res-meta">${res.author} (${res.year || 'n.d.'}) <br> <a href="https://doi.org/${res.doi}" target="_blank" style="color:#667eea;">${res.doi || ''}</a></div>
+                ${contentHtml}
+                <div class="tag-container">
+                    ${tagsHtml}
+                    <button class="add-tag-btn" onclick="openTagModal('${res.id}')">+ Tag</button>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    // --- Actions ---
+
+    function openAddModal(mode) {
+        currentMode = 'paper';
+        const modal = document.getElementById('add-modal');
+        const doiForm = document.getElementById('doi-form');
+        const stdForm = document.getElementById('standard-form');
+
+        // Reset tags
+        document.querySelectorAll('.modal-tag').forEach(t => t.classList.remove('selected'));
+
+        modal.style.display = 'flex';
+        doiForm.style.display = 'block';
+        stdForm.style.display = 'none';
+        document.getElementById('modal-title').innerText = "Add Paper or Guideline";
+    }
+
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    // Toggle logic for tags in modal
+    function toggleTag(el) {
+        el.classList.toggle('selected');
+    }
+
+    async function submitResource() {
+        if(isOffline) {
+            alert("Offline Mode: Cannot save new resources to server.");
+            return;
+        }
+
+        try {
+            const inputVal = document.getElementById('res-doi').value.trim();
+            const type = document.getElementById('res-category').value;
+
+            // Collect selected tags
+            const tags = [];
+            document.querySelectorAll('.modal-tag.selected').forEach(el => {
+                tags.push(el.dataset.val);
+            });
+
+            // Basic ISBN Detection (digits/hyphens only, 10-13 length mostly)
+            const isIsbn = /^[\d-]+$/.test(inputVal) && inputVal.replace(/-/g,'').length >= 10;
+            const endpoint = isIsbn ? `${API_URL}/isbn` : `${API_URL}/doi`;
+            const payload = isIsbn ? { isbn: inputVal } : { doi: inputVal };
+
+            const metaRes = await fetch(endpoint, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const meta = await metaRes.json();
+
+            if(meta.error) return alert("Invalid DOI or ISBN (or Metadata not found)");
+
+            await fetch(`${API_URL}/resource/add`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    methodId,
+                    methodName,
+                    type,
+                    metadata: meta,
+                    tags: tags
+                })
+            });
+
+            closeModal('add-modal');
+            fetchResources();
+
+        } catch(e) { alert("Error adding resource"); console.error(e); }
+    }
+
+    function openTagModal(resourceId) {
+        document.getElementById('tag-resource-id').value = resourceId;
+        document.getElementById('tag-modal').style.display = 'flex';
+    }
+
+    async function addTag(category) {
+        if(isOffline) return alert("Offline mode active.");
+        const resourceId = document.getElementById('tag-resource-id').value;
+        const selectId = category === 'language' ? 'tag-lang' : 'tag-area';
+        const tagValue = document.getElementById(selectId).value;
+
+        if(!tagValue) return;
+
+        await fetch(`${API_URL}/resource/tag`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ resourceId, tag: tagValue, action: 'add' })
+        });
+
+        closeModal('tag-modal');
+        fetchResources();
+    }
+
+    async function removeTag(resourceId, tag) {
+        if(isOffline) return alert("Offline mode active.");
+        if(!confirm(`Remove tag "${tag}"?`)) return;
+        await fetch(`${API_URL}/resource/tag`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ resourceId, tag, action: 'remove' })
+        });
+        fetchResources();
+    }
+
+    window.onload = fetchResources;
+    window.onclick = function(event) { if (event.target.classList.contains('modal')) event.target.style.display = "none"; }
+</script>
+</body>
+</html>
