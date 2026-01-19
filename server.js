@@ -7,24 +7,41 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '50mb' })); // Increased limit for large imports
 
-// --- NEO4J CONNECTION ---
-//const driver = neo4j.driver(
-//    'neo4j://localhost:7687',
-//    neo4j.auth.basic('neo4j', 'neo4j')
-//);
-
-// --- NEO4J CONNECTION ---
+//--- NEO4J CONNECTION ---
 const driver = neo4j.driver(
-    "neo4j+s://c44a5701.databases.neo4j.io",
-    neo4j.auth.basic("neo4j", "GhApEmnnOL6ZEm0hjas143NH8IifKpNMVSp8SsG4PDY")
+    'neo4j://localhost:7687',
+    neo4j.auth.basic('neo4j', 'neo4j')
 );
 
+// --- NEO4J CONNECTION ---
+//const driver = neo4j.driver(
+//    "neo4j+s://c44a5701.databases.neo4j.io",
+//    neo4j.auth.basic("neo4j", "GhApEmnnOL6ZEm0hjas143NH8IifKpNMVSp8SsG4PDY")
+//);
+
 const verifyConnection = async () => {
+    const session = driver.session();
     try {
         await driver.verifyConnectivity();
         console.log('✅ Connected to Neo4j');
+
+        // Create Hub and ensure Links to both Maps and Studies roots exist
+        await session.run(`
+            MERGE (h:Hub {name: "Hub"})
+            
+            // Existing Maps Root
+            MERGE (mMaps:RootNode {name: "Maps"})
+            MERGE (h)-[:LINKS_TO]->(mMaps)
+            
+            // NEW: Studies Root
+            MERGE (mStudies:RootNode {name: "Studies"})
+            MERGE (h)-[:LINKS_TO]->(mStudies)
+        `);
+        console.log('✅ Hub <-> Studies structure verified');
     } catch (error) {
         console.error('❌ Neo4j Connection Failed:', error.message);
+    } finally {
+        session.close();
     }
 };
 verifyConnection();
@@ -631,6 +648,306 @@ app.post('/isbn', async (req, res) => {
     } catch (e) {
         console.error(e);
         res.status(400).json({ error: "Error fetching ISBN" });
+    }
+});
+
+// NEW: Search Commons Items (RQs/Metrics) from existing Studies
+app.get('/commons/items', async (req, res) => {
+    const { type, q } = req.query; // type = 'rq' or 'metric'
+    const session = driver.session();
+    try {
+        // Fetch studies to aggregate their components
+        // Note: In a production graph, these would be individual nodes.
+        // Here we extract them from the JSON strings stored on Study nodes.
+
+        // Filter: Research Questions only exist for Standard studies
+        let cypher = `MATCH (:RootNode {name: "Studies"})-[:HAS_STUDY]->(s:OpenStudy) `;
+        if (type === 'rq') {
+            cypher += `WHERE s.type = 'Standard' `;
+        }
+        cypher += `RETURN s.rqs as rqs, s.metrics as metrics, s.title as source`;
+
+        const result = await session.run(cypher);
+
+        let items = [];
+        result.records.forEach(r => {
+            const source = r.get('source');
+            let list = [];
+            try {
+                // Parse the JSON string stored in Neo4j
+                const raw = type === 'rq' ? r.get('rqs') : r.get('metrics');
+                list = raw ? JSON.parse(raw) : [];
+            } catch(e) { list = []; }
+
+            // Normalize and add to pool
+            list.forEach(item => {
+                // Ensure we don't have duplicates based on text
+                if (!items.find(existing => existing.text === item.text)) {
+                    items.push({
+                        id: item.id || `gen-${Math.random().toString(36).substr(2, 9)}`,
+                        text: item.text,
+                        source: source // Attribution to the study it came from
+                    });
+                }
+            });
+        });
+
+        // Filter by search query if present
+        if (q) {
+            items = items.filter(i => i.text.toLowerCase().includes(q.toLowerCase()));
+        }
+
+        res.json(items);
+    } catch (err) {
+        console.error("Commons search error:", err);
+        res.status(500).json({ error: "Fetch error" });
+    } finally {
+        session.close();
+    }
+});
+
+// NEW: Verify Study Password
+app.post('/study/verify-password', async (req, res) => {
+    const { id, password } = req.body;
+    const session = driver.session();
+    try {
+        const result = await session.run(`
+            MATCH (s:OpenStudy {id: $id})
+            RETURN s.password as pwd
+        `, { id });
+
+        if (result.records.length === 0) return res.status(404).json({ error: "Study not found" });
+
+        // Handle potential null/undefined stored password safely
+        const storedPwd = result.records[0].get('pwd') || "";
+        const inputPwd = password || "";
+
+        // Simple comparison
+        if (storedPwd === inputPwd) {
+            res.json({ success: true });
+        } else {
+            res.status(403).json({ error: "Invalid Password" });
+        }
+    } catch (err) {
+        console.error("Verify password error:", err);
+        res.status(500).json({ error: "Verification Error" });
+    } finally {
+        session.close();
+    }
+});
+
+// NEW: Get Single Study Details (for editing)
+app.get('/study/:id', async (req, res) => {
+    const { id } = req.params;
+    const session = driver.session();
+    try {
+        const result = await session.run(`
+            MATCH (s:OpenStudy {id: $id})
+            RETURN properties(s) as study
+        `, { id });
+
+        if (result.records.length === 0) return res.status(404).json({ error: "Study not found" });
+
+        const s = result.records[0].get('study');
+
+        // Parse JSON strings back to objects
+        const parse = (str) => { try { return JSON.parse(str || '[]'); } catch { return []; } };
+
+        const studyData = {
+            id: s.id,
+            title: s.title,
+            description: s.description,
+            type: s.type,
+            domain: s.domain,
+            keywords: s.keywords,
+            zenodoLink: s.zenodoLink,
+            password: s.password, // Send password to client to pre-fill? Usually unsafe, but OK for prototype if user verified.
+                                  // Better: Don't send, require re-entry to save. For now, sending for convenience in edit form.
+            repoMeta: parse(s.repoMeta),
+            rqs: parse(s.rqs),
+            metrics: parse(s.metrics),
+            exercises: parse(s.exercises),
+            protocols: parse(s.protocols),
+            solutions: parse(s.solutions),
+            issues: parse(s.issues)
+        };
+
+        res.json(studyData);
+    } catch (err) {
+        console.error("Get study error:", err);
+        res.status(500).json({ error: "Fetch error" });
+    } finally {
+        session.close();
+    }
+});
+
+// NEW: Update Study
+app.post('/study/update', async (req, res) => {
+    const {
+        id, // Existing ID
+        studyType, title, abstract, domain, keywords, zenodoLink, repoMeta,
+        rqs, metrics, exercises, protocols, solutions, issues, password
+    } = req.body;
+
+    const session = driver.session();
+    try {
+        const rqString = JSON.stringify(rqs || []);
+        const metricString = JSON.stringify(metrics || []);
+        const exerciseString = JSON.stringify(exercises || []);
+        const protocolString = JSON.stringify(protocols || []);
+        const solutionString = JSON.stringify(solutions || []);
+        const repoMetaString = JSON.stringify(repoMeta || {});
+        const issueString = JSON.stringify(issues || []);
+
+        await session.run(`
+            MATCH (s:OpenStudy {id: $id})
+            SET s.type = $studyType,
+                s.title = $title,
+                s.description = $abstract,
+                s.domain = $domain,
+                s.keywords = $keywords,
+                s.zenodoLink = $zenodoLink,
+                s.repoMeta = $repoMetaString,
+                s.password = $password,
+                
+                s.rqs = $rqString,
+                s.metrics = $metricString,
+                s.exercises = $exerciseString,
+                s.protocols = $protocolString,
+                s.solutions = $solutionString,
+                s.issues = $issueString
+        `, {
+            id, studyType, title, abstract, domain, keywords, zenodoLink,
+            rqString, metricString, exerciseString, protocolString, solutionString, repoMetaString,
+            issues: issueString, password: password || ""
+        });
+
+        res.json({ success: true, id });
+    } catch (err) {
+        console.error("Update study error:", err);
+        res.status(500).json({ error: "Update Error" });
+    } finally {
+        session.close();
+    }
+});
+
+// UPDATE: Create Benchmark / Open Study (now with password)
+app.post('/benchmark/create', async (req, res) => {
+    const {
+        studyType,
+        title,
+        abstract,
+        domain,
+        keywords,
+        zenodoLink,
+        repoMeta,
+        rqs,
+        metrics,
+        exercises,
+        protocols,
+        solutions,
+        issues,
+        password // New field
+    } = req.body;
+
+    const session = driver.session();
+    try {
+        const id = `study-${Date.now()}`;
+
+        // Serialize complex objects/arrays for storage properties
+        const rqString = JSON.stringify(rqs || []);
+        const metricString = JSON.stringify(metrics || []);
+        const exerciseString = JSON.stringify(exercises || []);
+        const protocolString = JSON.stringify(protocols || []);
+        const solutionString = JSON.stringify(solutions || []); // Added solutions
+        const repoMetaString = JSON.stringify(repoMeta || {});
+        const issueString = JSON.stringify(issues || []);
+
+        await session.run(`
+            MATCH (root:RootNode {name: "Studies"})
+            
+            CREATE (s:OpenStudy {
+                id: $id,
+                type: $studyType,
+                title: $title,
+                description: $abstract,
+                domain: $domain,
+                keywords: $keywords,
+                zenodoLink: $zenodoLink,
+                repoMeta: $repoMetaString,
+                password: $password,
+                
+                // Modular Components
+                rqs: $rqString,
+                metrics: $metricString,
+                
+                // Benchmark Specifics
+                exercises: $exerciseString,
+                protocols: $protocolString,
+                solutions: $solutionString,
+                
+                // Community & Status
+                issues: $issueString,
+                status: 'Active',
+                datasets: 0,
+                created: timestamp()
+            })
+            
+            MERGE (root)-[:HAS_STUDY]->(s)
+        `, {
+            id, studyType, title, abstract, domain, keywords, zenodoLink,
+            rqString, metricString, exerciseString, protocolString, solutionString, repoMetaString,
+            issueString, // Fix: Ensure this matches the $issueString in the Cypher query
+            password: password || ""
+        });
+
+        res.json({ success: true, id });
+    } catch (err) {
+        console.error("Create study error:", err);
+        res.status(500).json({ error: "Create Error" });
+    } finally {
+        session.close();
+    }
+});
+
+// GET BENCHMARKS LIST (Updated to include component counts/types for filtering)
+app.get('/benchmarks', async (req, res) => {
+    const session = driver.session();
+    try {
+        const result = await session.run(`
+            MATCH (:RootNode {name: "Studies"})-[:HAS_STUDY]->(s:OpenStudy)
+            RETURN properties(s) as study 
+            ORDER BY s.created DESC
+        `);
+
+        const studies = result.records.map(record => {
+            const s = record.get('study');
+
+            // Safe JSON parsing helper
+            const parse = (str) => { try { return JSON.parse(str || '[]'); } catch { return []; } };
+
+            return {
+                id: s.id,
+                title: s.title,
+                description: s.description,
+                status: s.status,
+                type: s.type,
+                domain: s.domain,
+                keywords: s.keywords, // ADDED: Return keywords for filtering
+                // Parse these for filtering on frontend
+                metrics: parse(s.metrics),
+                exercises: parse(s.exercises),
+                protocols: parse(s.protocols),
+                solutions: parse(s.solutions),
+                rqs: parse(s.rqs)
+            };
+        });
+        res.json(studies);
+    } catch (err) {
+        console.error("Fetch error:", err);
+        res.status(500).json({ error: "Neo4j error" });
+    } finally {
+        session.close();
     }
 });
 

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Open Research Studies | Commons</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --bg-color: #fcfcfc;
+            --text-main: #2d3748;
+            --border-color: #e2e8f0;
+            --active-chip-bg: #2d3748;
+            --active-chip-text: #ffffff;
+        }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; display: flex; flex-direction: column; height: 100vh; width: 100vw; overflow: hidden; }
+
+        /* Header */
+        header {
+            background-color: #fff; padding: 0 30px; height: 70px;
+            border-bottom: 1px solid var(--border-color); flex-shrink: 0;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); z-index: 10;
+        }
+        .brand-hub {
+            font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;
+            background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none;
+        }
+        .page-title { margin: 0; font-size: 1.4rem; font-weight: 800; color: #1a202c; letter-spacing: -0.5px; margin-left: 15px; border-left: 1px solid #cbd5e0; padding-left: 15px; display: inline-block;}
+
+        .btn { border: none; border-radius: 8px; font-weight: 600; cursor: pointer; padding: 10px 24px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; transition: 0.2s; }
+        .btn-primary { background: var(--primary-gradient); color: white; box-shadow: 0 4px 6px rgba(118, 75, 162, 0.3); }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 12px rgba(118, 75, 162, 0.4); }
+
+        /* Layout */
+        .layout-container { display: flex; flex: 1; overflow: hidden; width: 100%; }
+
+        /* FACETED SIDEBAR STYLES (New) */
+        .sidebar {
+            width: 340px; background: white; border-right: 1px solid var(--border-color);
+            display: flex; flex-direction: column; flex-shrink: 0;
+            padding: 30px 25px; overflow-y: auto;
+        }
+
+        .facet-group { margin-bottom: 30px; }
+
+        .facet-title {
+            font-size: 0.75rem; font-weight: 800; letter-spacing: 1px;
+            color: #a0aec0; text-transform: uppercase; margin-bottom: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .chip-container { display: flex; flex-wrap: wrap; gap: 8px; }
+
+        /* The Pill/Chip Button */
+        .filter-chip {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            color: #4a5568;
+            padding: 6px 14px;
+            border-radius: 20px; /* Pill shape */
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            user-select: none;
+            display: inline-flex; align-items: center;
+        }
+
+        .filter-chip:hover {
+            border-color: #cbd5e0;
+            transform: translateY(-1px);
+            background: #f7fafc;
+        }
+
+        /* Active State (Dark Navy) */
+        .filter-chip.active {
+            background: var(--active-chip-bg);
+            color: var(--active-chip-text);
+            border-color: var(--active-chip-bg);
+            box-shadow: 0 4px 6px rgba(45, 55, 72, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .search-input {
+            width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px;
+            font-family: inherit; font-size: 0.9rem; box-sizing: border-box;
+            background: #f8fafc; transition: 0.2s;
+        }
+        .search-input:focus { border-color: #667eea; outline: none; background: #fff; }
+
+        /* Main Content */
+        .main-content { flex: 1; padding: 40px; overflow-y: auto; background: #fcfcfc; }
+        .benchmarks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 30px; }
+
+        /* Cards */
+        .benchmark-card {
+            background: #fff; border-radius: 16px; padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02); border: 1px solid #f0f0f0;
+            transition: all 0.2s; display: flex; flex-direction: column;
+        }
+        .benchmark-card:hover { transform: translateY(-5px); border-color: #667eea; box-shadow: 0 15px 30px rgba(0,0,0,0.06); }
+
+        .card-top { display: flex; justify-content: space-between; margin-bottom: 15px; }
+        .badge { padding: 5px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge-bench { background: #E9D8FD; color: #553C9A; }
+        .badge-std { background: #bee3f8; color: #2c5282; }
+
+        .benchmark-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 8px; color: #2d3748; text-decoration: none; line-height: 1.3; }
+        .benchmark-meta { font-size: 0.85rem; color: #718096; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; font-weight: 500;}
+        .benchmark-desc { font-size: 0.95rem; color: #4a5568; line-height: 1.6; margin-bottom: 25px; flex-grow: 1; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+        .tags-preview { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
+        .mini-tag { background: #f1f5f9; color: #64748b; font-size: 0.75rem; padding: 4px 10px; border-radius: 6px; font-weight: 600; }
+
+        /* Action Buttons Area */
+        .card-actions {
+            display: flex; gap: 10px; margin-top: auto; padding-top: 15px; border-top: 1px solid #f0f0f0;
+        }
+        .action-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            text-decoration: none;
+            display: flex; align-items: center; justify-content: center; gap: 5px;
+        }
+        .btn-modify { background: #fff; border-color: #cbd5e0; color: #4a5568; }
+        .btn-modify:hover { background: #f7fafc; border-color: #a0aec0; color: #2d3748; }
+
+        .btn-results { background: #ebf8ff; color: #2b6cb0; border-color: transparent; }
+        .btn-results:hover { background: #bee3f8; color: #2c5282; }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <div style="display:flex; align-items:center;">
+        <a href="index.html" class="brand-hub">Design Research Commons</a>
+        <h2 class="page-title">Open Studies</h2>
+    </div>
+    <a href="study_design.html" class="btn btn-primary"><i class="fas fa-plus"></i> Create New Study</a>
+</header>
+
+<div class="layout-container">
+
+    <aside class="sidebar">
+
+        <div class="facet-group">
+            <div class="facet-title">Search Content</div>
+            <input type="text" id="filter-text" class="search-input" placeholder="Keywords, questions..." onkeyup="applyFilters()">
+        </div>
+
+        <div id="facets-container"></div>
+
+        <div style="margin-top:auto; font-size:0.8rem; color:#a0aec0; border-top:1px solid #f0f0f0; padding-top:20px;">
+            Showing <strong id="count-display" style="color:#2d3748">0</strong> studies
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div id="benchmarks-list" class="benchmarks-grid">
+            <div style="grid-column: 1/-1; text-align: center; color: #a0aec0; margin-top: 50px;">
+                <i class="fas fa-spinner fa-spin"></i> Loading studies...
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    const API_URL = "http://localhost:3001";
+    let allStudies = [];
+
+    async function loadBenchmarks() {
+        try {
+            const res = await fetch(`${API_URL}/benchmarks`);
+            if (!res.ok) throw new Error("Server error");
+            allStudies = await res.json();
+
+            initFilters();
+            applyFilters();
+        } catch (e) {
+            console.error(e);
+            document.getElementById('benchmarks-list').innerHTML = `<div style="text-align:center; width:100%;">Failed to load studies.</div>`;
+        }
+    }
+
+    // --- Dynamic Facet Generation ---
+    function initFilters() {
+        const container = document.getElementById('facets-container');
+        container.innerHTML = '';
+
+        // 1. Study Type
+        const types = ['Standard Open Study', 'Benchmark Study']; // Explicit list
+        createFacetGroup('Study Type', types, 'type');
+
+        // 2. Design Area (Domain) - Include all standard options + any others found
+        const standardDomains = ['Engineering Design', 'Systems Engineering', 'Software Engineering', 'Architecture', 'UX'];
+        const foundDomains = [...new Set(allStudies.map(s => s.domain).filter(d => d))];
+        const domains = [...new Set([...standardDomains, ...foundDomains])].sort();
+        createFacetGroup('Design Area', domains, 'domain');
+
+        // 3. Keywords (Aggregated from all studies)
+        const keywordsSet = new Set();
+        allStudies.forEach(s => {
+            if(s.keywords) {
+                // Split by comma if it's a string
+                const kws = s.keywords.split(',').map(k => k.trim()).filter(k=>k);
+                kws.forEach(k => keywordsSet.add(k));
+            }
+        });
+        if(keywordsSet.size > 0) createFacetGroup('Keywords', [...keywordsSet].sort(), 'keyword');
+
+        // 4. Outcomes / Metrics
+        const metricsSet = new Set();
+        allStudies.forEach(s => s.metrics && s.metrics.forEach(m => metricsSet.add(m.text)));
+        if(metricsSet.size > 0) createFacetGroup('Outcomes / Metrics', [...metricsSet].sort().slice(0, 10), 'metric');
+
+        // 5. Exercises
+        const exercisesSet = new Set();
+        allStudies.forEach(s => s.exercises && s.exercises.forEach(e => { if(e.length < 30) exercisesSet.add(e); }));
+        if(exercisesSet.size > 0) createFacetGroup('Exercises', [...exercisesSet].sort().slice(0,10), 'exercise');
+
+        // 6. Protocols
+        const protocolsSet = new Set();
+        allStudies.forEach(s => s.protocols && s.protocols.forEach(p => { if(!p.startsWith('http')) protocolsSet.add(p); }));
+        if(protocolsSet.size > 0) createFacetGroup('Protocols', [...protocolsSet].sort(), 'protocol');
+
+        // 7. Solutions
+        const solutionsSet = new Set();
+        allStudies.forEach(s => s.solutions && s.solutions.forEach(sol => { if(!sol.startsWith('http')) solutionsSet.add(sol); }));
+        if(solutionsSet.size > 0) createFacetGroup('Solutions', [...solutionsSet].sort(), 'solution');
+    }
+
+    function createFacetGroup(title, items, groupKey) {
+        if(items.length === 0) return;
+
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'facet-group';
+
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'facet-title';
+        titleDiv.innerText = title;
+        groupDiv.appendChild(titleDiv);
+
+        const chipsDiv = document.createElement('div');
+        chipsDiv.className = 'chip-container';
+
+        // Limit to 15 items initially to save space
+        const displayItems = items.length > 15 ? items.slice(0, 15) : items;
+
+        displayItems.forEach(item => {
+            const chip = document.createElement('button');
+            chip.className = 'filter-chip';
+            chip.innerText = item;
+            chip.dataset.value = item;
+            chip.dataset.group = groupKey;
+
+            // Toggle Logic
+            chip.onclick = () => {
+                chip.classList.toggle('active');
+                applyFilters();
+            };
+
+            chipsDiv.appendChild(chip);
+        });
+
+        groupDiv.appendChild(chipsDiv);
+        document.getElementById('facets-container').appendChild(groupDiv);
+    }
+
+    // --- Filtering Logic ---
+    function applyFilters() {
+        const getActive = (group) => Array.from(document.querySelectorAll(`.filter-chip.active[data-group="${group}"]`)).map(c => c.dataset.value);
+
+        const activeTypes = getActive('type');
+        const activeDomains = getActive('domain');
+        const activeKeywords = getActive('keyword');
+        const activeMetrics = getActive('metric');
+        const activeExercises = getActive('exercise');
+        const activeProtocols = getActive('protocol');
+        const activeSolutions = getActive('solution');
+
+        const textQuery = document.getElementById('filter-text').value.toLowerCase();
+
+        const filtered = allStudies.filter(s => {
+            // Study Type (Match partial string if needed, e.g. "Standard" vs "Standard Open Study")
+            if (activeTypes.length > 0) {
+                // Map frontend labels to backend values if they differ, or loosely match
+                const sType = s.type === 'Standard' ? 'Standard Open Study' : 'Benchmark Study';
+                if (!activeTypes.includes(sType)) return false;
+            }
+
+            // Domain
+            if (activeDomains.length > 0 && !activeDomains.includes(s.domain)) return false;
+
+            // Keywords (Any Match)
+            if (activeKeywords.length > 0) {
+                if(!s.keywords) return false;
+                const sKws = s.keywords.split(',').map(k=>k.trim());
+                if(!activeKeywords.some(ak => sKws.includes(ak))) return false;
+            }
+
+            // Metrics
+            if (activeMetrics.length > 0) {
+                const sMetrics = s.metrics ? s.metrics.map(m => m.text) : [];
+                if (!activeMetrics.some(m => sMetrics.includes(m))) return false;
+            }
+
+            // Exercises
+            if (activeExercises.length > 0) {
+                if (!s.exercises || !activeExercises.some(ex => s.exercises.includes(ex))) return false;
+            }
+
+            // Protocols
+            if (activeProtocols.length > 0) {
+                if (!s.protocols || !activeProtocols.some(p => s.protocols.includes(p))) return false;
+            }
+
+            // Solutions
+            if (activeSolutions.length > 0) {
+                if (!s.solutions || !activeSolutions.some(sol => s.solutions.includes(sol))) return false;
+            }
+
+            // Text Search (Title, RQs, Keywords)
+            if (textQuery) {
+                const titleMatch = s.title.toLowerCase().includes(textQuery);
+                const rqMatch = s.rqs && s.rqs.some(r => r.text.toLowerCase().includes(textQuery));
+                const kwMatch = s.keywords && s.keywords.toLowerCase().includes(textQuery);
+                if (!titleMatch && !rqMatch && !kwMatch) return false;
+            }
+
+            return true;
+        });
+
+        document.getElementById('count-display').innerText = filtered.length;
+        renderBenchmarks(filtered);
+    }
+
+    function renderBenchmarks(list) {
+        const container = document.getElementById('benchmarks-list');
+        container.innerHTML = '';
+
+        if (list.length === 0) {
+            container.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:#a0aec0; padding:40px;">No studies found matching your filters.</div>`;
+            return;
+        }
+
+        list.forEach(b => {
+            const card = document.createElement('div');
+            card.className = 'benchmark-card';
+
+            const isBench = b.type === 'Benchmark';
+            const badgeClass = isBench ? 'badge-bench' : 'badge-std';
+            const typeLabel = isBench ? 'Benchmark' : 'Standard Study';
+
+            let metricTags = '';
+            if(b.metrics && b.metrics.length > 0) {
+                metricTags = b.metrics.slice(0, 3).map(m => `<span class="mini-tag">${m.text.substring(0, 20)}</span>`).join('');
+                if(b.metrics.length > 3) metricTags += `<span class="mini-tag">+${b.metrics.length - 3}</span>`;
+            }
+
+            // Direct link to view design (no password needed to view)
+            card.innerHTML = `
+                <div class="card-top">
+                    <span class="badge ${badgeClass}">${typeLabel}</span>
+                </div>
+                <div class="benchmark-title">${b.title}</div>
+                <div class="benchmark-meta">
+                    <span style="color:#a0aec0;">Design Area:</span> ${b.domain || 'Uncategorized'}
+                </div>
+                <div class="benchmark-desc">${b.description}</div>
+
+                <div class="tags-preview">${metricTags}</div>
+
+                <div class="card-actions">
+                    <a href="study_design.html?id=${b.id}" class="action-btn btn-modify">
+                        <i class="fas fa-eye"></i> View Design
+                    </a>
+                    <a href="benchmark_view.html?id=${b.id}" class="action-btn btn-results">
+                        <i class="fas fa-chart-line"></i> Results
+                    </a>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    window.onload = loadBenchmarks;
+</script>
+</body>
+</html>

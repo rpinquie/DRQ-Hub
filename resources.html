@@ -53,8 +53,16 @@
         }
 
         .page-title { margin: 0; font-size: 1.5rem; font-weight: 800; color: #1a202c; letter-spacing: -0.5px; }
-        .nav-link { text-decoration: none; font-weight: 600; font-size: 0.9rem; padding: 8px 16px; border-radius: 20px; color: #718096; transition: all 0.2s; }
-        .nav-link:hover { background-color: #edf2f7; color: #4a5568; }
+
+        .btn {
+            border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
+            padding: 8px 16px; font-family: 'Poppins', sans-serif; font-size: 0.85rem;
+            transition: transform 0.1s, box-shadow 0.2s;
+            text-decoration: none;
+        }
+        .btn:active { transform: translateY(1px); }
+        .btn-secondary { background-color: #fff; border: 1px solid var(--border-color); color: var(--text-main); }
+        .btn-secondary:hover { background-color: #f7fafc; }
 
         /* ERROR BANNER */
         #connection-status {
@@ -170,7 +178,7 @@
         <h2 class="page-title">Design Research Quality Resources</h2>
     </div>
 
-    <div class="filters-container">
+    <div class="filters-container" style="flex-grow: 1; justify-content: center;">
         <div class="filter-group">
             <span class="filter-label">Research Class</span>
             <select id="paradigm-select" class="class-selector" onchange="switchParadigm(this.value)">
@@ -187,7 +195,7 @@
         </div>
     </div>
 
-    <a href="index.html" class="nav-link">&larr; Back to Map</a>
+    <a href="index.html" class="btn btn-secondary">Back to Home</a>
 </header>
 
 <div id="connection-status"></div>

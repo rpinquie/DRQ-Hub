@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Design Modular Study | Research Commons</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --primary: #4a5568; --accent: #3182ce; --bg: #f4f7f6; --card-bg: #ffffff; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); margin: 0; padding-bottom: 80px; color: #2d3748; }
+
+        /* Full Width Header */
+        .header { background: white; padding: 20px 40px; border-bottom: 1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; }
+
+        /* Fluid Container with Better Responsiveness */
+        .container {
+            width: 100%;
+            padding: 40px;
+            box-sizing: border-box;
+            max-width: 1400px; /* Prevent it from getting too stretched on huge screens */
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); /* Dynamic fitting */
+            gap: 30px;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            .container { padding: 20px; grid-template-columns: 1fr; }
+            .header { padding: 20px; }
+        }
+
+        /* Form spans full width initially */
+        #study-form { display: contents; }
+
+        .section-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; height: fit-content; display: flex; flex-direction: column; }
+        .full-width-card { grid-column: 1 / -1; }
+
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #f7fafc; }
+        .section-title { font-size: 1.1rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; }
+
+        label { display: block; font-weight: 600; color: #718096; margin-bottom: 8px; font-size: 0.9rem; }
+        input, textarea, select { width: 100%; padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px; font-family: inherit; margin-bottom: 15px; box-sizing: border-box; }
+        input:disabled, textarea:disabled, select:disabled { background-color: #f7fafc; color: #718096; cursor: not-allowed; }
+
+        .hidden { display: none !important; }
+
+        /* Dynamic Lists */
+        .dynamic-list-item { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+        .btn-icon { background: #edf2f7; border: 1px solid #e2e8f0; width: 45px; height: 45px; border-radius: 8px; cursor: pointer; color: #4a5568; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .btn-icon:hover { background: #e2e8f0; }
+        .btn-link { color: var(--accent); background: #ebf8ff; border-color: #bee3f8; text-decoration: none; }
+        .btn-link:hover { background: #bee3f8; color: #2c5282; }
+
+        /* Modules */
+        .module-list { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+        .module-item {
+            background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
+            padding: 15px; position: relative; border-left: 4px solid var(--accent);
+            word-break: break-word; /* Prevents long text from breaking layout */
+            padding-right: 40px; /* Space for X button */
+        }
+        .module-meta { font-size: 0.85rem; color: #718096; margin-top: 5px; font-style: italic; }
+        .btn-remove { position: absolute; right: 15px; top: 15px; color: #e53e3e; cursor: pointer; border: none; background: none; width: auto; height: auto; }
+
+        /* Buttons that adapt */
+        .btn-add-big {
+            background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+            border: 2px dashed #cbd5e0; color: #4a5568;
+            width: 100%; padding: 20px;
+            border-radius: 12px; font-weight: 600; cursor: pointer;
+            text-align: center; transition: all 0.2s ease;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+            box-sizing: border-box;
+            min-height: 100px;
+        }
+        .btn-add-big:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); background: #ebf8ff; }
+        .btn-add-big i { font-size: 1.5rem; color: var(--accent); }
+
+        .btn-add-small { background: white; border: 1px dashed #cbd5e0; color: #718096; width: 100%; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 500; }
+
+        /* Tooltip Styles */
+        .info-icon {
+            margin-left: 10px; cursor: pointer; color: #3182ce; position: relative;
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+
+        .info-tooltip {
+            display: none;
+            position: absolute;
+            left: 100%; top: -10px;
+            margin-left: 15px;
+            width: 300px;
+            background: white;
+            border: 1px solid #bee3f8;
+            color: #2d3748;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            z-index: 100;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            font-weight: normal;
+            text-transform: none;
+            letter-spacing: normal;
+        }
+
+        /* Arrow for tooltip */
+        .info-tooltip::after {
+            content: "";
+            position: absolute;
+            top: 15px;
+            right: 100%;
+            margin-top: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: transparent white transparent transparent;
+        }
+
+        .info-tooltip ul { margin: 5px 0 0 20px; padding: 0; }
+
+        /* Show tooltip on hover or when class 'active' is added via click */
+        .info-icon:hover .info-tooltip, .info-icon.active .info-tooltip { display: block; }
+
+        /* Mobile adjustment for tooltip */
+        @media (max-width: 768px) {
+            .info-tooltip { left: auto; right: -50px; top: 30px; margin-left: 0; width: 250px; }
+            .info-tooltip::after {
+                top: -10px; right: 50px;
+                border-color: transparent transparent white transparent;
+            }
+        }
+
+        /* Threads UI */
+        .thread-item { background: #fff; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .thread-meta { font-size: 0.8rem; color: #a0aec0; }
+        .thread-form { background: #f7fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; margin-top: 15px; }
+
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: white; width: 600px; max-height: 80vh; overflow-y: auto; border-radius: 12px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        .search-result { padding: 15px; border-bottom: 1px solid #edf2f7; cursor: pointer; }
+        .search-result:hover { background: #ebf8ff; }
+
+        .footer-action { position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding: 15px 40px; border-top: 1px solid #e2e8f0; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); z-index: 90; display:flex; justify-content: flex-end; box-sizing: border-box;}
+        .btn-submit { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 15px 50px; border-radius: 8px; font-weight: 700; font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 6px rgba(118, 75, 162, 0.3); }
+        .btn-submit:disabled { background: #cbd5e0; cursor: not-allowed; box-shadow: none; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div>
+        <h2 style="margin:0;" id="page-heading">Design New Study</h2>
+        <span style="font-size:0.85rem; color:#718096;">Digital Research Commons Mode</span>
+    </div>
+
+    <div style="display:flex; gap:15px; align-items:center;">
+        <button id="btn-unlock" class="btn-add-small hidden" onclick="unlockStudy()" style="width:auto; border-color:#f6ad55; color:#dd6b20; background:#fffaf0;">
+            <i class="fas fa-lock"></i> Edit Study
+        </button>
+        <a href="community.html" style="color:#718096; text-decoration:none; font-weight:600;">Cancel</a>
+    </div>
+</div>
+
+<div class="container">
+    <form id="study-form" onsubmit="submitStudy(event)">
+
+        <!-- Study Identity -->
+        <div class="section-card full-width-card">
+            <div class="section-header">
+                <span class="section-title"><i class="fas fa-fingerprint" style="margin-right:8px;"></i> Study Identity</span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; align-items: start;">
+                <div>
+                    <label>Study Type</label>
+                    <select id="study-type" onchange="toggleSections()">
+                        <option value="Standard">Standard Open Study</option>
+                        <option value="Benchmark">Benchmark Study</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Study Title</label>
+                    <input type="text" id="title" required placeholder="e.g., Comparative Analysis of VR in UX Design">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr; margin-top: 15px;">
+                <label>Set Password (to edit later)</label>
+                <input type="password" id="study-password" placeholder="Choose a password..." required>
+            </div>
+
+            <label>Abstract</label>
+            <textarea id="abstract" required placeholder="Summary of the study goal..." style="height: 100px;"></textarea>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                <div>
+                    <label>Domain</label>
+                    <select id="domain" onchange="toggleCustomDomain(this)">
+                        <option value="Engineering Design">Engineering Design</option>
+                        <option value="Systems Engineering">Systems Engineering</option>
+                        <option value="Software Engineering">Software Engineering</option>
+                        <option value="Architecture">Architecture</option>
+                        <option value="UX">UX</option>
+                        <option value="Other">Other (Please Specify)</option>
+                    </select>
+                    <input type="text" id="custom-domain" class="hidden" placeholder="Enter custom domain..." style="margin-top:10px;">
+                </div>
+                <div>
+                    <label>Keywords</label>
+                    <input type="text" id="keywords" placeholder="e.g. Generative Design, VR...">
+                </div>
+            </div>
+        </div>
+
+        <!-- Research Questions (FULL WIDTH) -->
+        <div id="rq-section" class="section-card full-width-card">
+            <div class="section-header">
+                <span class="section-title"><i class="fas fa-question-circle" style="margin-right:8px;"></i> Research Questions</span>
+            </div>
+            <!-- Flexible list area -->
+            <div id="rq-list" class="module-list"></div>
+            <br>
+            <div class="btn-add-big" onclick="openCommonsModal('rq')">
+                <i class="fas fa-search-plus"></i>
+                <span>Add Question from Commons</span>
+            </div>
+        </div>
+
+        <!-- Metrics (FULL WIDTH, BELOW RQ) -->
+        <div class="section-card full-width-card">
+            <div class="section-header">
+                <span class="section-title">
+                    <i class="fas fa-ruler-combined" style="margin-right:8px;"></i>
+                    Metrics & Outcomes
+                    <span style="font-size: 0.75rem; font-weight: normal; color: #718096; text-transform: none; margin-left: 10px;">(Measured, Observed, Dependent variables)</span>
+                </span>
+            </div>
+            <!-- Flexible list area -->
+            <div id="metric-list" class="module-list"></div>
+            <br>
+            <div class="btn-add-big" onclick="openCommonsModal('metric')">
+                <i class="fas fa-chart-bar"></i>
+                <span>Add Metric from Commons</span>
+            </div>
+        </div>
+
+        <!-- Benchmark Specific Sections -->
+        <div id="benchmark-sections" class="hidden full-width-card" style="padding:0; border:none; box-shadow:none; display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:30px;">
+
+            <div id="exercises-section" class="section-card" style="border-left: 5px solid #805ad5; height: auto;">
+                <div class="section-header"><span class="section-title">Exercises (Tasks)</span></div>
+                <div id="exercises-list"></div>
+                <button type="button" class="btn-add-small" onclick="addDynamicItem('exercises-list', 'Repo URL or Description')">+ Add Exercise</button>
+            </div>
+
+            <div id="protocols-section" class="section-card" style="border-left: 5px solid #805ad5; height: auto;">
+                <!-- Updated Header with Tooltip -->
+                <div class="section-header">
+                    <span class="section-title">
+                        Protocols
+                        <span class="info-icon" onclick="this.classList.toggle('active')">
+                            <i class="fas fa-info-circle"></i>
+                            <div class="info-tooltip">
+                                <strong><i class="fas fa-check-circle"></i> Protocol Requirements</strong>
+                                <ul>
+                                    <li><strong>Participants:</strong> Demographics, sample size, exclusion criteria.</li>
+                                    <li><strong>Procedure:</strong> Step-by-step task sequence & timing.</li>
+                                    <li><strong>Environment:</strong> Hardware/Software setup used.</li>
+                                    <li><strong>Data Collection:</strong> How metrics are captured.</li>
+                                </ul>
+                            </div>
+                        </span>
+                    </span>
+                </div>
+
+                <div id="protocols-list"></div>
+                <button type="button" class="btn-add-small" onclick="addDynamicItem('protocols-list', 'Repo URL or Protocol Document Link')">+ Add Protocol</button>
+            </div>
+
+            <div id="solutions-section" class="section-card" style="border-left: 5px solid #805ad5; height: auto;">
+                <div class="section-header"><span class="section-title">Solutions</span></div>
+                <div id="solutions-list"></div>
+                <button type="button" class="btn-add-small" onclick="addDynamicItem('solutions-list', 'Repo URL to Solution Baseline')">+ Add Solution</button>
+            </div>
+        </div>
+
+        <!-- FAIR Data -->
+        <div id="fair-section" class="section-card full-width-card">
+            <div class="section-header">
+                <span class="section-title"><i class="fas fa-database" style="margin-right:8px;"></i> FAIR Data & Open Science</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                <div>
+                    <label>Platform</label>
+                    <select id="repo-type"><option>Zenodo</option><option>GitHub</option><option>OSF</option></select>
+                </div>
+                <div>
+                    <label>Type</label>
+                    <select id="data-type"><option>Raw Dataset</option><option>Protocol</option><option>Code</option></select>
+                </div>
+                <div>
+                    <label>Repository URL</label>
+                    <input type="url" id="repo-url" placeholder="https://..." required>
+                </div>
+            </div>
+        </div>
+
+        <!-- Issues & Discussions (Visible only in EDIT MODE) -->
+        <div id="issues-section" class="section-card full-width-card hidden">
+            <div class="section-header">
+                <span class="section-title"><i class="far fa-comments" style="margin-right:8px;"></i> Issues & Discussion Threads</span>
+                <button type="button" class="btn-add-small" style="width:auto; margin:0;" onclick="toggleThreadForm()">+ New Discussion Thread</button>
+            </div>
+
+            <!-- List of created threads -->
+            <div id="threads-container">
+                <div style="color:#a0aec0; font-style:italic; padding:10px; text-align:center;" id="no-threads-msg">No open issues or discussion threads yet.</div>
+            </div>
+
+            <!-- Add Thread Form -->
+            <div id="new-thread-form" class="thread-form hidden">
+                <h4 style="margin-top:0;">Start a New Discussion Thread</h4>
+                <label>Topic / Subject</label>
+                <input type="text" id="thread-subject" placeholder="e.g., Question about Exclusion Criteria">
+                <label>Initial Message</label>
+                <textarea id="thread-body" placeholder="Describe the issue or question in detail..." style="height:80px;"></textarea>
+                <div style="display:flex; justify-content:flex-end; gap:10px;">
+                    <button type="button" class="btn-add-small" style="width:auto;" onclick="toggleThreadForm()">Cancel</button>
+                    <button type="button" class="btn-submit" style="padding:10px 30px; font-size:0.9rem;" onclick="addThread()">Post Thread</button>
+                </div>
+            </div>
+        </div>
+
+        <div style="height: 60px;"></div>
+    </form>
+</div>
+
+<div class="footer-action">
+    <button id="btn-submit-main" type="submit" onclick="document.getElementById('study-form').dispatchEvent(new Event('submit'))" class="btn-submit">Publish Study to Commons</button>
+</div>
+
+<!-- Modal for Commons Search -->
+<div id="commons-modal" class="modal" onclick="if(event.target === this) closeCommonsModal()">
+    <div class="modal-content">
+        <h3 style="margin-top:0;">Search Research Commons</h3>
+        <input type="text" class="search-bar" style="width:100%; padding:10px; margin-bottom:15px;" placeholder="Search..." onkeyup="filterCommons(this.value)">
+        <div id="commons-results"></div>
+        <div style="margin-top:20px; border-top:1px solid #eee; padding-top:15px;">
+            <button type="button" id="btn-create-dynamic" style="width:100%; padding:12px; background:#2d3748; color:white; border-radius:6px; cursor:pointer;" onclick="createNewModule()">Create New</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = "http://localhost:3001";
+    let activeType = '';
+
+    // Check if we are editing an existing study
+    const urlParams = new URLSearchParams(window.location.search);
+    const existingStudyId = urlParams.get('id');
+    const isEditMode = !!existingStudyId;
+
+    let currentCommonsData = [];
+    let selectedRQs = [], selectedMetrics = [];
+    let discussionThreads = [];
+
+    async function initPage() {
+        if(isEditMode) {
+            document.getElementById('page-heading').innerText = "View Study Design";
+            document.getElementById('btn-submit-main').innerText = "Update Study";
+            document.getElementById('btn-submit-main').disabled = true; // Disabled initially until unlocked
+
+            document.getElementById('issues-section').classList.remove('hidden'); // Show issues in edit/view mode
+            document.getElementById('btn-unlock').classList.remove('hidden'); // Show unlock button
+
+            // Load existing data
+            try {
+                const res = await fetch(`${API_URL}/study/${existingStudyId}`);
+                if(res.ok) {
+                    const data = await res.json();
+                    populateForm(data);
+                    disableForm(); // Make read-only by default
+                } else {
+                    alert("Study not found.");
+                }
+            } catch(e) { console.error(e); }
+        }
+        toggleSections(); // Initial toggle based on default or loaded value
+    }
+
+    function populateForm(data) {
+        document.getElementById('study-type').value = data.type;
+        document.getElementById('title').value = data.title;
+        document.getElementById('abstract').value = data.description;
+
+        // Handle Domain
+        const domSelect = document.getElementById('domain');
+        const domOpts = Array.from(domSelect.options).map(o => o.value);
+        if(domOpts.includes(data.domain)) {
+            domSelect.value = data.domain;
+        } else {
+            domSelect.value = 'Other';
+            const custDom = document.getElementById('custom-domain');
+            custDom.classList.remove('hidden');
+            custDom.value = data.domain;
+        }
+
+        document.getElementById('keywords').value = data.keywords;
+        // Password is explicitly NOT populated for security
+
+        // Components
+        selectedRQs = data.rqs || [];
+        selectedMetrics = data.metrics || [];
+        discussionThreads = data.issues || [];
+
+        // Render Lists
+        renderSelectedItems('rq-list', selectedRQs, 'rq');
+        renderSelectedItems('metric-list', selectedMetrics, 'metric');
+        renderThreads();
+
+        // Benchmark Arrays (Strings)
+        if(data.exercises) data.exercises.forEach(ex => addDynamicItem('exercises-list', 'Repo URL or Description', ex));
+        if(data.protocols) data.protocols.forEach(p => addDynamicItem('protocols-list', 'Repo URL...', p));
+        if(data.solutions) data.solutions.forEach(s => addDynamicItem('solutions-list', 'Repo URL...', s));
+
+        // FAIR Data
+        if(data.zenodoLink) document.getElementById('repo-url').value = data.zenodoLink;
+        if(data.repoMeta) {
+            document.getElementById('repo-type').value = data.repoMeta.platform || 'Zenodo';
+            document.getElementById('data-type').value = data.repoMeta.dataType || 'Raw Dataset';
+        }
+    }
+
+    function disableForm() {
+        const form = document.getElementById('study-form');
+        const elements = form.querySelectorAll('input, select, textarea, button');
+        elements.forEach(el => {
+            // EXCEPTION: Don't disable elements in the issues section
+            if (el.closest('#issues-section')) return;
+            el.disabled = true;
+        });
+
+        // Hide add/remove buttons to clean up view
+        document.querySelectorAll('.btn-add-big, .btn-add-small, .btn-remove').forEach(el => {
+            // Keep issues buttons visible
+            if (el.closest('#issues-section')) return;
+            // FIX: Don't hide the unlock button which is in the header, outside form
+            if (el.id === 'btn-unlock') return;
+
+            el.style.display = 'none';
+        });
+
+        // Enable navigation links (URL buttons) so they can be clicked in read-only mode
+        document.querySelectorAll('.btn-link').forEach(el => {
+            el.disabled = false;
+            el.style.pointerEvents = 'auto'; // Ensure clickable
+        });
+    }
+
+    async function unlockStudy() {
+        const pwd = prompt("Enter study password to edit:");
+        if(!pwd) return;
+
+        try {
+            const res = await fetch(`${API_URL}/study/verify-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: existingStudyId, password: pwd })
+            });
+
+            if (res.ok) {
+                // Unlock form
+                const form = document.getElementById('study-form');
+                const elements = form.querySelectorAll('input, select, textarea, button');
+                elements.forEach(el => el.disabled = false);
+
+                // Show controls
+                document.querySelectorAll('.btn-add-big, .btn-add-small, .btn-remove').forEach(el => el.style.display = '');
+
+                // Update header
+                document.getElementById('page-heading').innerText = "Modify Study Design";
+                document.getElementById('btn-unlock').classList.add('hidden');
+                document.getElementById('btn-submit-main').disabled = false;
+
+                // Set password field for convenience
+                document.getElementById('study-password').value = pwd;
+
+                alert("Study Unlocked for Editing.");
+            } else {
+                alert("Incorrect password.");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Verification failed.");
+        }
+    }
+
+    function renderSelectedItems(containerId, list, type) {
+        const c = document.getElementById(containerId);
+        c.innerHTML = '';
+        list.forEach(i => {
+            const e = document.createElement('div');
+            e.className = 'module-item';
+            e.id = 'mod-'+i.id;
+
+            let displayHtml = `<div><strong>${i.text}</strong>`;
+            if (type === 'metric' && i.definition) {
+                displayHtml += `<div class="module-meta">${i.definition}</div>`;
+            }
+            displayHtml += `</div>`;
+
+            e.innerHTML = `${displayHtml}<button type='button' class='btn-remove' onclick="removeModule('${i.id}','${type}')"><i class='fas fa-times'></i></button>`;
+            c.appendChild(e);
+        });
+    }
+
+    function toggleSections() {
+        const type = document.getElementById('study-type').value;
+        const bench = document.getElementById('benchmark-sections');
+        const fair = document.getElementById('fair-section');
+        const rqSection = document.getElementById('rq-section');
+        const repoUrl = document.getElementById('repo-url');
+
+        if(type === 'Benchmark') {
+            bench.classList.remove('hidden');
+            bench.style.display = 'grid';
+
+            fair.classList.add('hidden');
+            repoUrl.removeAttribute('required');
+
+            rqSection.classList.add('hidden');
+        } else {
+            bench.classList.add('hidden');
+            bench.style.display = 'none';
+
+            fair.classList.remove('hidden');
+            repoUrl.setAttribute('required', 'true');
+
+            rqSection.classList.remove('hidden');
+        }
+    }
+
+    function toggleCustomDomain(e){ const i=document.getElementById('custom-domain'); if(e.value==='Other'){i.classList.remove('hidden');i.focus()}else{i.classList.add('hidden')} }
+
+    // Updated addDynamicItem to render URL links
+    function addDynamicItem(containerId, placeholder, value = '') {
+        const container = document.getElementById(containerId);
+        const div = document.createElement('div');
+        div.className = 'dynamic-list-item';
+
+        // Check if value is a URL or Identifier
+        const link = resolveLink(value);
+        const linkBtnStyle = link ? 'display:flex;' : 'display:none;';
+
+        div.innerHTML = `
+            <input type="text" placeholder="${placeholder}" value="${value}" oninput="checkUrl(this)">
+            <a href="${link || '#'}" target="_blank" class="btn-icon btn-link" style="${linkBtnStyle}">
+                <i class="fas fa-external-link-alt"></i>
+            </a>
+            <button type="button" class="btn-icon btn-remove" onclick="this.parentElement.remove()">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+        container.appendChild(div);
+    }
+
+    function checkUrl(input) {
+        const val = input.value;
+        const btn = input.nextElementSibling; // The <a> tag
+        const link = resolveLink(val);
+
+        if (link) {
+            btn.style.display = 'flex';
+            btn.href = link;
+        } else {
+            btn.style.display = 'none';
+        }
+    }
+
+    function resolveLink(val) {
+        if (!val) return null;
+        val = val.trim();
+        if (val.toLowerCase().startsWith('http://') || val.toLowerCase().startsWith('https://')) return val;
+        // DOI detection (starts with 10. and contains /)
+        if (val.startsWith('10.') && val.includes('/')) return 'https://doi.org/' + val;
+
+        // ISBN detection (10 or 13 chars, digits/dashes/spaces)
+        let clean = val.replace(/^ISBN\s+/i, '').replace(/[- ]/g, '');
+        if ((clean.length === 10 || clean.length === 13) && /^[0-9]{9}[0-9X]$|^[0-9]{13}$/i.test(clean)) {
+            return 'https://isbnsearch.org/isbn/' + clean;
+        }
+        return null;
+    }
+
+    // --- Commons Logic ---
+
+    async function openCommonsModal(t) {
+        activeType = t;
+        document.getElementById('commons-modal').style.display = 'flex';
+        const resultsContainer = document.getElementById('commons-results');
+
+        resultsContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#718096;"><i class="fas fa-spinner fa-spin"></i> searching global knowledge graph...</div>';
+
+        try {
+            const res = await fetch(`${API_URL}/commons/items?type=${t}`);
+            if(!res.ok) throw new Error("Failed to fetch");
+
+            currentCommonsData = await res.json();
+            renderResults(currentCommonsData);
+        } catch(e) {
+            console.error(e);
+            resultsContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#e53e3e;">Failed to load data from Research Commons.</div>';
+        }
+    }
+
+    function closeCommonsModal(){document.getElementById('commons-modal').style.display='none'}
+
+    function renderResults(l){
+        const c=document.getElementById('commons-results');
+        c.innerHTML='';
+
+        if(l.length === 0) {
+            c.innerHTML = '<div style="text-align:center; padding:20px; color:#718096;">No items found. Create a new one?</div>';
+            return;
+        }
+
+        l.forEach(i=>{
+            const d=document.createElement('div');
+            d.className='search-result';
+            d.innerHTML=`<b>${i.text}</b><br><small style="color:#718096">Source: ${i.source || 'Unknown'}</small>`;
+            d.onclick=()=>addModule(i);
+            c.appendChild(d)
+        });
+    }
+
+    function filterCommons(q){
+        if(!q) renderResults(currentCommonsData);
+        else renderResults(currentCommonsData.filter(i=>i.text.toLowerCase().includes(q.toLowerCase())));
+    }
+
+    function addModule(i){const l=activeType==='rq'?selectedRQs:selectedMetrics;if(l.find(x=>x.id===i.id))return;l.push(i);const t=document.getElementById(activeType==='rq'?'rq-list':'metric-list');const e=document.createElement('div');e.className='module-item';e.id='mod-'+i.id;
+
+        let displayHtml = `<div><strong>${i.text}</strong>`;
+        if (activeType === 'metric' && i.definition) {
+            displayHtml += `<div class="module-meta">${i.definition}</div>`;
+        }
+        displayHtml += `</div>`;
+
+        e.innerHTML=`${displayHtml}<button type='button' class='btn-remove' onclick="removeModule('${i.id}','${activeType}')"><i class='fas fa-times'></i></button>`;t.appendChild(e);closeCommonsModal()}
+
+    function removeModule(id,t){if(t==='rq')selectedRQs=selectedRQs.filter(x=>x.id!==id);else selectedMetrics=selectedMetrics.filter(x=>x.id!==id);document.getElementById('mod-'+id).remove()}
+
+    function createNewModule(){
+        const t = prompt("New Item:");
+        if(!t) return;
+
+        if (activeType === 'metric') {
+            const def = prompt(`Define the metric "${t}" (optional):`);
+            const item = {id:'n'+Date.now(), text:t, source:'User', definition: def || "No definition provided."};
+            addModule(item);
+        } else {
+            addModule({id:'n'+Date.now(), text:t, source:'User'});
+        }
+        closeCommonsModal();
+    }
+
+    // --- Thread Management ---
+    function toggleThreadForm() {
+        const form = document.getElementById('new-thread-form');
+        if (form.classList.contains('hidden')) {
+            form.classList.remove('hidden');
+            document.getElementById('thread-subject').focus();
+        } else {
+            form.classList.add('hidden');
+        }
+    }
+
+    async function addThread() {
+        const subject = document.getElementById('thread-subject').value;
+        const body = document.getElementById('thread-body').value;
+        if(!subject || !body) { alert("Please fill in both subject and message."); return; }
+
+        const thread = {
+            id: 'th-' + Date.now(),
+            subject: subject,
+            initialPost: body,
+            date: new Date().toLocaleDateString(),
+            author: 'Current User' // Mock
+        };
+
+        discussionThreads.push(thread);
+        renderThreads();
+
+        // Reset and hide
+        document.getElementById('thread-subject').value = '';
+        document.getElementById('thread-body').value = '';
+        toggleThreadForm();
+
+        // Auto-save if viewing existing study
+        if (isEditMode) {
+            await saveIssuesOnly();
+        }
+    }
+
+    function renderThreads() {
+        const container = document.getElementById('threads-container');
+        if (discussionThreads.length === 0) {
+            container.innerHTML = `<div style="color:#a0aec0; font-style:italic; padding:10px; text-align:center;">No open issues or discussion threads yet.</div>`;
+            return;
+        }
+
+        container.innerHTML = '';
+        discussionThreads.forEach(t => {
+            const div = document.createElement('div');
+            div.className = 'thread-item';
+            div.innerHTML = `
+                <div>
+                    <strong><i class="far fa-comments"></i> ${t.subject}</strong>
+                    <div class="thread-meta">Started by ${t.author} on ${t.date}</div>
+                    <div style="font-size:0.9rem; color:#4a5568; margin-top:5px;">${t.initialPost.substring(0, 80)}${t.initialPost.length>80?'...':''}</div>
+                </div>
+                <button type="button" class="btn-icon" style="color:#e53e3e;" onclick="deleteThread('${t.id}')"><i class="fas fa-trash"></i></button>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    async function deleteThread(id) {
+        if(confirm("Delete this discussion thread?")) {
+            discussionThreads = discussionThreads.filter(t => t.id !== id);
+            renderThreads();
+
+            // Auto-save if viewing existing study
+            if (isEditMode) {
+                await saveIssuesOnly();
+            }
+        }
+    }
+
+    // Helper to save issues without needing full unlock/password re-entry
+    async function saveIssuesOnly() {
+        try {
+            // 1. Fetch current full object to get the real password and other fields safely
+            const res = await fetch(`${API_URL}/study/${existingStudyId}`);
+            if(!res.ok) throw new Error("Fetch failed");
+            const currentData = await res.json();
+
+            // 2. Update issues
+            currentData.issues = discussionThreads;
+
+            // 3. Send back
+            const updateRes = await fetch(`${API_URL}/study/update`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(currentData)
+            });
+
+            if(updateRes.ok) {
+                console.log("Discussion updated automatically.");
+            } else {
+                console.error("Failed to save discussion.");
+            }
+        } catch(e) {
+            console.error("Error syncing discussion:", e);
+        }
+    }
+
+    // --- Submission ---
+    async function submitStudy(e){
+        e.preventDefault();
+
+        const getVals = (id) => Array.from(document.getElementById(id).querySelectorAll('input')).map(i => i.value).filter(v => v);
+
+        const data = {
+            studyType: document.getElementById('study-type').value,
+            title: document.getElementById('title').value,
+            password: document.getElementById('study-password').value,
+            abstract: document.getElementById('abstract').value,
+            domain: document.getElementById('domain').value === 'Other' ? document.getElementById('custom-domain').value : document.getElementById('domain').value,
+            keywords: document.getElementById('keywords').value,
+            rqs: selectedRQs,
+            metrics: selectedMetrics,
+            exercises: getVals('exercises-list'),
+            protocols: getVals('protocols-list'),
+            solutions: getVals('solutions-list'),
+            issues: discussionThreads,
+
+            // FAIR Data
+            zenodoLink: document.getElementById('repo-url').value,
+            repoMeta: {
+                platform: document.getElementById('repo-type').value,
+                dataType: document.getElementById('data-type').value
+            }
+        };
+
+        // Determine Endpoint: Create or Update
+        const endpoint = isEditMode ? `${API_URL}/study/update` : `${API_URL}/benchmark/create`;
+        if(isEditMode) data.id = existingStudyId;
+
+        console.log("Submitting Study Data:", data);
+
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if(response.ok) {
+                alert(isEditMode ? "Study Updated Successfully!" : "Study Published Successfully to Commons!");
+                window.location.href='community.html';
+            } else {
+                alert("Error saving study.");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Network error.");
+        }
+    }
+
+    window.onload = initPage;
+</script>
+</body>
+</html>

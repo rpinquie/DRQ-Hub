@@ -8,6 +8,7 @@
         :root {
             --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             --secondary-gradient: linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%);
+            --tertiary-gradient: linear-gradient(135deg, #4299e1 0%, #3182ce 100%); /* Blue for Community */
             --bg-color: #f4f7f6;
             --card-bg: #ffffff;
             --text-main: #2d3748;
@@ -26,47 +27,45 @@
 
         .container {
             text-align: center;
+            max-width: 1200px;
             padding: 40px;
-            max-width: 900px;
         }
 
         h1 {
-            font-size: 3.5rem;
-            font-weight: 800;
+            font-size: 3rem;
             margin-bottom: 10px;
-            background: var(--primary-gradient);
+            background: -webkit-linear-gradient(#2d3748, #4a5568);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            line-height: 1.2;
+            letter-spacing: -1px;
         }
 
-        p.subtitle {
+        .subtitle {
             font-size: 1.2rem;
             color: var(--text-light);
-            margin-bottom: 60px;
+            margin-bottom: 50px;
             font-weight: 300;
         }
 
         .card-container {
             display: flex;
             justify-content: center;
-            gap: 40px;
+            gap: 30px;
             flex-wrap: wrap;
         }
 
         .nav-card {
             background: var(--card-bg);
-            border-radius: 20px;
+            width: 300px;
             padding: 40px 30px;
-            width: 280px;
+            border-radius: 20px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
             text-decoration: none;
-            color: var(--text-main);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s;
             display: flex;
             flex-direction: column;
             align-items: center;
-            border: 2px solid transparent;
+            text-align: center;
             position: relative;
             overflow: hidden;
         }
@@ -74,7 +73,6 @@
         .nav-card:hover {
             transform: translateY(-10px);
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            border-color: #e2e8f0;
         }
 
         .icon-circle {
@@ -84,17 +82,21 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
             margin-bottom: 25px;
+            font-size: 2rem;
             color: white;
-            z-index: 1;
+            transition: transform 0.3s;
+        }
+
+        .nav-card:hover .icon-circle {
+            transform: scale(1.1) rotate(5deg);
         }
 
         .card-title {
             font-size: 1.4rem;
-            font-weight: 700;
+            font-weight: 800;
             margin-bottom: 15px;
-            z-index: 1;
+            color: var(--text-main);
         }
 
         .card-desc {
@@ -107,6 +109,7 @@
         /* Specific Colors */
         .card-map .icon-circle { background: var(--primary-gradient); box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3); }
         .card-resources .icon-circle { background: var(--secondary-gradient); box-shadow: 0 8px 20px rgba(255, 75, 43, 0.3); }
+        .card-community .icon-circle { background: var(--tertiary-gradient); box-shadow: 0 8px 20px rgba(66, 153, 225, 0.3); }
 
     </style>
 </head>
@@ -130,7 +133,15 @@
                 <i class="fas fa-book-open"></i>
             </div>
             <div class="card-title">Quality Resources</div>
-            <div class="card-desc">Interactive matrix of research designs, data collection techniques, risks, and guidelines.</div>
+            <div class="card-desc">Explore matrices of research methods, guidelines, and empirical standards.</div>
+        </a>
+
+        <a href="community.html" class="nav-card card-community">
+            <div class="icon-circle">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="card-title">Open Design Research Studies</div>
+            <div class="card-desc">Collaborate on open study designs, compare solutions, and share datasets via Zenodo.</div>
         </a>
     </div>
 </div>
