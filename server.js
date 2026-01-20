@@ -7,18 +7,22 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '50mb' })); // Increased limit for large imports
 
-//--- NEO4J CONNECTION ---
+// --- NEO4J CONNECTION ---
+// Localhost (Commented out)
+
 const driver = neo4j.driver(
     'neo4j://localhost:7687',
     neo4j.auth.basic('neo4j', 'neo4j')
 );
 
-// --- NEO4J CONNECTION ---
-//const driver = neo4j.driver(
-//    "neo4j+s://c44a5701.databases.neo4j.io",
-//    neo4j.auth.basic("neo4j", "GhApEmnnOL6ZEm0hjas143NH8IifKpNMVSp8SsG4PDY")
-//);
 
+// Cloud Connection (Enabled)
+/*
+const driver = neo4j.driver(
+    "neo4j+s://c44a5701.databases.neo4j.io",
+    neo4j.auth.basic("neo4j", "GhApEmnnOL6ZEm0hjas143NH8IifKpNMVSp8SsG4PDY")
+);
+*/
 const verifyConnection = async () => {
     const session = driver.session();
     try {
@@ -819,7 +823,8 @@ app.post('/study/update', async (req, res) => {
         `, {
             id, studyType, title, abstract, domain, keywords, zenodoLink,
             rqString, metricString, exerciseString, protocolString, solutionString, repoMetaString,
-            issues: issueString, password: password || ""
+            issues: issueString,
+            password: password || ""
         });
 
         res.json({ success: true, id });
@@ -897,7 +902,7 @@ app.post('/benchmark/create', async (req, res) => {
         `, {
             id, studyType, title, abstract, domain, keywords, zenodoLink,
             rqString, metricString, exerciseString, protocolString, solutionString, repoMetaString,
-            issueString, // Fix: Ensure this matches the $issueString in the Cypher query
+            issues: issueString,
             password: password || ""
         });
 

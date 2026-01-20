@@ -11,15 +11,15 @@
         /* Full Width Header */
         .header { background: white; padding: 20px 40px; border-bottom: 1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; }
 
-        /* Fluid Container with Better Responsiveness */
+        /* Fluid Container */
         .container {
             width: 100%;
             padding: 40px;
             box-sizing: border-box;
-            max-width: 1400px; /* Prevent it from getting too stretched on huge screens */
+            max-width: 1400px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); /* Dynamic fitting */
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 30px;
         }
 
@@ -56,13 +56,13 @@
         .module-item {
             background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
             padding: 15px; position: relative; border-left: 4px solid var(--accent);
-            word-break: break-word; /* Prevents long text from breaking layout */
-            padding-right: 40px; /* Space for X button */
+            word-break: break-word;
+            padding-right: 40px;
         }
         .module-meta { font-size: 0.85rem; color: #718096; margin-top: 5px; font-style: italic; }
         .btn-remove { position: absolute; right: 15px; top: 15px; color: #e53e3e; cursor: pointer; border: none; background: none; width: auto; height: auto; }
 
-        /* Buttons that adapt */
+        /* Buttons */
         .btn-add-big {
             background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
             border: 2px dashed #cbd5e0; color: #4a5568;
@@ -78,57 +78,13 @@
 
         .btn-add-small { background: white; border: 1px dashed #cbd5e0; color: #718096; width: 100%; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 500; }
 
-        /* Tooltip Styles */
-        .info-icon {
-            margin-left: 10px; cursor: pointer; color: #3182ce; position: relative;
-            display: inline-flex; align-items: center; justify-content: center;
-        }
-
-        .info-tooltip {
-            display: none;
-            position: absolute;
-            left: 100%; top: -10px;
-            margin-left: 15px;
-            width: 300px;
-            background: white;
-            border: 1px solid #bee3f8;
-            color: #2d3748;
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            line-height: 1.6;
-            z-index: 100;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            font-weight: normal;
-            text-transform: none;
-            letter-spacing: normal;
-        }
-
-        /* Arrow for tooltip */
-        .info-tooltip::after {
-            content: "";
-            position: absolute;
-            top: 15px;
-            right: 100%;
-            margin-top: -5px;
-            border-width: 5px;
-            border-style: solid;
-            border-color: transparent white transparent transparent;
-        }
-
+        /* Tooltip */
+        .info-icon { margin-left: 10px; cursor: pointer; color: #3182ce; position: relative; display: inline-flex; align-items: center; justify-content: center; }
+        .info-tooltip { display: none; position: absolute; left: 100%; top: -10px; margin-left: 15px; width: 300px; background: white; border: 1px solid #bee3f8; color: #2d3748; padding: 15px; border-radius: 8px; font-size: 0.85rem; line-height: 1.6; z-index: 100; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); font-weight: normal; }
+        .info-tooltip::after { content: ""; position: absolute; top: 15px; right: 100%; margin-top: -5px; border-width: 5px; border-style: solid; border-color: transparent white transparent transparent; }
         .info-tooltip ul { margin: 5px 0 0 20px; padding: 0; }
-
-        /* Show tooltip on hover or when class 'active' is added via click */
         .info-icon:hover .info-tooltip, .info-icon.active .info-tooltip { display: block; }
-
-        /* Mobile adjustment for tooltip */
-        @media (max-width: 768px) {
-            .info-tooltip { left: auto; right: -50px; top: 30px; margin-left: 0; width: 250px; }
-            .info-tooltip::after {
-                top: -10px; right: 50px;
-                border-color: transparent transparent white transparent;
-            }
-        }
+        @media (max-width: 768px) { .info-tooltip { left: auto; right: -50px; top: 30px; margin-left: 0; width: 250px; } .info-tooltip::after { top: -10px; right: 50px; border-color: transparent transparent white transparent; } }
 
         /* Threads UI */
         .thread-item { background: #fff; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
@@ -369,10 +325,10 @@
         if(isEditMode) {
             document.getElementById('page-heading').innerText = "View Study Design";
             document.getElementById('btn-submit-main').innerText = "Update Study";
-            document.getElementById('btn-submit-main').disabled = true; // Disabled initially until unlocked
+            document.getElementById('btn-submit-main').disabled = true;
 
-            document.getElementById('issues-section').classList.remove('hidden'); // Show issues in edit/view mode
-            document.getElementById('btn-unlock').classList.remove('hidden'); // Show unlock button
+            document.getElementById('issues-section').classList.remove('hidden');
+            document.getElementById('btn-unlock').classList.remove('hidden');
 
             // Load existing data
             try {
@@ -380,13 +336,13 @@
                 if(res.ok) {
                     const data = await res.json();
                     populateForm(data);
-                    disableForm(); // Make read-only by default
+                    disableForm();
                 } else {
                     alert("Study not found.");
                 }
             } catch(e) { console.error(e); }
         }
-        toggleSections(); // Initial toggle based on default or loaded value
+        toggleSections();
     }
 
     function populateForm(data) {
